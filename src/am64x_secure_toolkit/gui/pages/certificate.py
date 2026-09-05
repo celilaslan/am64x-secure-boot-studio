@@ -479,11 +479,13 @@ class CertificatePage(QWidget):
         self.create_wizard_scroll.setWidget(self.create_wizard)
         root.addWidget(self.create_wizard_scroll, 1)
 
-        nav = QHBoxLayout()
+        self.create_nav = QWidget()
+        nav = QHBoxLayout(self.create_nav)
+        nav.setContentsMargins(0, 0, 0, 0)
         self.create_back = QPushButton("← Geri"); self.create_back.clicked.connect(self._prev_create_step)
         self.create_next = QPushButton("Devam →"); self.create_next.setObjectName("primaryAction"); self.create_next.clicked.connect(self._next_create_step)
         nav.addWidget(self.create_back); nav.addStretch(1); nav.addWidget(self.create_next)
-        root.addLayout(nav)
+        root.addWidget(self.create_nav)
 
         # Live gating: required fields control Devam immediately instead of waiting
         # for a modal error after the user clicks.
