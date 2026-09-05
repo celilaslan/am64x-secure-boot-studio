@@ -21,6 +21,8 @@ def test_application_scan_prefers_existing_signed_output_and_can_verify_it():
         "Certificate/image zaten hazır; tekrar imzalama gerekmez.",
         "Hazır İmzalı Image'ı Doğrula",
         "inspect_and_verify(str(self._ready_signed_input), verify=True)",
+        "Hangi durumda ne olacak?",
+        "application X.509 certificate TI signer tarafından",
     ]:
         assert token in page
 
