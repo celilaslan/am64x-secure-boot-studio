@@ -33,6 +33,51 @@ class CertificatePage(_BaseCertificatePage):
     def __init__(self, state) -> None:
         super().__init__(state)
         self._upgrade_signing_key_step()
+        self._install_guided_application_route()
+
+    def _install_guided_application_route(self) -> None:
+        """Keep raw TI application-certificate fields out of the normal CCS path."""
+        create_page = self.tabs.widget(1)
+        create_layout = create_page.layout()
+        self._create_progress = create_layout.itemAt(1).widget()
+
+        self._create_application_route = QFrame()
+        self._create_application_route.setObjectName("infoCard")
+        route_layout = QVBoxLayout(self._create_application_route)
+        route_title = QLabel("Application için standart yol: CCS / MCU+ SDK build")
+        route_title.setObjectName("sectionTitle")
+        route_text = QLabel(
+            "Normal kullanımda Destination Address, Host ID ve processor flag alanlarını burada elle doldurmanız gerekmez. "
+            "Önce CCS/MCU+ SDK ile application projesini build edin; Secure Application ekranı build klasöründeki "
+            "unsigned .mcelf veya .appimage girdisini bulur ve resmi TI signer akışını kullanır. "
+            "Bu ham certificate formu yalnız Uzman Modu'ndaki standalone/integration çalışmaları içindir."
+        )
+        route_text.setWordWrap(True)
+        route_text.setObjectName("mutedText")
+        route_button = QPushButton("CCS / Secure Application Akışını Aç")
+        route_button.setObjectName("primaryAction")
+        route_button.clicked.connect(lambda: self.navigate.emit("application"))
+        route_layout.addWidget(route_title)
+        route_layout.addWidget(route_text)
+        route_layout.addWidget(route_button)
+        route_layout.addStretch(1)
+        create_layout.insertWidget(1, self._create_application_route, 1)
+        self._sync_guided_application_route()
+
+    def _sync_guided_application_route(self) -> None:
+        if not hasattr(self, "_create_application_route"):
+            return
+        guided_application = self.state.mode != "expert" and self.create_kind.currentData() == "application"
+        self._create_application_route.setVisible(guided_application)
+        if self._create_progress is not None:
+            self._create_progress.setVisible(not guided_application)
+        self.create_wizard_scroll.setVisible(not guided_application)
+        self.create_back.setVisible(not guided_application)
+        self.create_next.setVisible(not guided_application)
+
+    def _refresh_mode_ui(self, *_args) -> None:
+        super()._refresh_mode_ui(*_args)
+        self._sync_guided_application_route()
 
     @staticmethod
     def _clear_layout(layout) -> None:
@@ -245,3 +290,4 @@ class CertificatePage(_BaseCertificatePage):
             self.create_key.clear()
             self._set_key_status(self.create_key_generation_status, "Certificate türü değişti; yeni role için key'i yeniden oluşturun.", "statusWarn")
             self._update_create_navigation_state()
+        self._sync_guided_application_route()
