@@ -20,9 +20,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ...services.ccs_build import scan_ccs_application_build
 from ...services.environment import resolve_environment
 from ...services.project import suggest_project_output
 from ...workflows.application import application_build_workflow
+from ...workflows.inspect import inspect_and_verify
 from ..widgets import HumanResultView
 from .common import file_field, require_field, set_field_invalid, show_guided_error
 
@@ -35,6 +37,8 @@ class ApplicationPage(QWidget):
     def __init__(self, state) -> None:
         super().__init__()
         self.state = state
+        self._ccs_scan: dict | None = None
+        self._ready_signed_input: Path | None = None
         root = QVBoxLayout(self)
         title = QLabel("Secure Application Oluştur")
         title.setObjectName("pageTitle")
@@ -214,41 +218,72 @@ class ApplicationPage(QWidget):
         return path.exists() and path.is_file()
 
     def _input_step(self) -> QWidget:
-        page = QWidget(); layout = QVBoxLayout(page)
+        page = QWidget()
+        layout = QVBoxLayout(page)
         layout.addWidget(self._card(
-            "1 · Application",
-            "CCS/MCU+ SDK build sonrasında oluşan unsigned application çıktısını seçin veya build klasörünü taratın."
+            "1 · CCS / MCU+ SDK Build",
+            "Önerilen yol: CCS'te projeyi build edin ve proje/build klasörünü seçin. "
+            "Studio hazır imzalı HS-FS çıktısını yeniden imzalamaz; doğrudan doğrular."
         ))
-        form = QFormLayout()
-        self.input, box = file_field(page, "Unsigned .mcelf veya .appimage dosyası seç")
-        self.input.setPlaceholderText("Unsigned .mcelf/.appimage seçin veya Build Klasörünü Tara'yı kullanın")
-        form.addRow("Application dosyası", box)
-        layout.addLayout(form)
 
         discovery = QFrame()
         discovery.setObjectName("infoCard")
         discovery_layout = QHBoxLayout(discovery)
         discovery_text = QVBoxLayout()
-        discovery_title = QLabel("CCS / MCU+ SDK build çıktısını bul")
+        discovery_title = QLabel("CCS proje veya build klasörünü seç")
         discovery_title.setObjectName("sectionTitle")
         discovery_note = QLabel(
-            "Dosya adını veya yerini bilmeniz gerekmiyor. CCS'te proje build edildikten sonra proje ya da build "
-            "klasörünü seçin; Studio unsigned .mcelf ve .appimage adaylarını tarayıp size gösterir. "
-            "Yalnız .out varsa SDK boot-image/post-build aşaması henüz tamamlanmamıştır."
+            "Dosya adını, .mcelf konumunu veya certificate alanlarını bilmeniz gerekmez. Studio .appimage.hs_fs, "
+            "unsigned .appimage/.mcelf ve linker .out çıktılarını ayırır; yapılacak sonraki işlemi kendisi gösterir."
         )
         discovery_note.setWordWrap(True)
         discovery_note.setObjectName("mutedText")
         discovery_text.addWidget(discovery_title)
         discovery_text.addWidget(discovery_note)
         discovery_layout.addLayout(discovery_text, 1)
-        discover_button = QPushButton("Build Klasörünü Tara")
+        discover_button = QPushButton("CCS Build Klasörünü Seç")
+        discover_button.setObjectName("primaryAction")
         discover_button.clicked.connect(self._choose_application_build_dir)
         discovery_layout.addWidget(discover_button)
         layout.addWidget(discovery)
-        self.discovery_status = QLabel("Henüz build klasörü taranmadı.")
+
+        self.discovery_status = QLabel("Henüz CCS build klasörü seçilmedi.")
         self.discovery_status.setWordWrap(True)
         self.discovery_status.setObjectName("mutedText")
         layout.addWidget(self.discovery_status)
+
+        self.ccs_actions = QFrame()
+        self.ccs_actions.setObjectName("infoCard")
+        ccs_action_layout = QHBoxLayout(self.ccs_actions)
+        self.ccs_verify_button = QPushButton("Hazır İmzalı Image'ı Doğrula")
+        self.ccs_verify_button.setObjectName("primaryAction")
+        self.ccs_verify_button.clicked.connect(self._verify_ready_ccs_image)
+        self.ccs_unsigned_button = QPushButton("Kendi Key'imle Yeni Image Hazırla")
+        self.ccs_unsigned_button.clicked.connect(self._select_unsigned_ccs_input)
+        ccs_action_layout.addWidget(self.ccs_verify_button)
+        ccs_action_layout.addWidget(self.ccs_unsigned_button)
+        ccs_action_layout.addStretch(1)
+        self.ccs_actions.setVisible(False)
+        layout.addWidget(self.ccs_actions)
+
+        manual = QFrame()
+        manual.setObjectName("infoCard")
+        manual_layout = QVBoxLayout(manual)
+        manual_title = QLabel("Gerekirse: unsigned girdiyi doğrudan seç")
+        manual_title.setObjectName("sectionTitle")
+        manual_note = QLabel(
+            "Bu seçenek standalone/custom signing içindir. CCS zaten .appimage.hs_fs ürettiyse bu alanı kullanmayın."
+        )
+        manual_note.setWordWrap(True)
+        manual_note.setObjectName("mutedText")
+        manual_layout.addWidget(manual_title)
+        manual_layout.addWidget(manual_note)
+        form = QFormLayout()
+        self.input, box = file_field(page, "Unsigned .mcelf veya .appimage dosyası seç")
+        self.input.setPlaceholderText("Unsigned .mcelf/.appimage; normalde yukarıdaki CCS klasör seçimini kullanın")
+        form.addRow("Unsigned application", box)
+        manual_layout.addLayout(form)
+        layout.addWidget(manual)
 
         self.sdk_status_card = QFrame()
         self.sdk_status_card.setObjectName("infoCard")
@@ -281,6 +316,12 @@ class ApplicationPage(QWidget):
         layout.addStretch(1)
         return page
 
+    def _set_discovery_status(self, text: str, object_name: str) -> None:
+        self.discovery_status.setText(text)
+        self.discovery_status.setObjectName(object_name)
+        self.discovery_status.style().unpolish(self.discovery_status)
+        self.discovery_status.style().polish(self.discovery_status)
+
     def _choose_application_build_dir(self) -> None:
         directory = QFileDialog.getExistingDirectory(
             self,
@@ -288,58 +329,96 @@ class ApplicationPage(QWidget):
         )
         if not directory:
             return
-        root = Path(directory)
         try:
-            candidates: list[Path] = []
-            for pattern in ("*.mcelf", "*.appimage"):
-                candidates.extend(path for path in root.rglob(pattern) if path.is_file())
-            unique = {str(path.resolve()).casefold(): path for path in candidates}
-            candidates = sorted(
-                unique.values(),
-                key=lambda path: path.stat().st_mtime,
-                reverse=True,
-            )
-            if not candidates:
-                signed = next(
-                    (path for path in root.rglob("*.appimage.hs_fs") if path.is_file()),
-                    None,
-                )
-                if signed is not None:
-                    raise FileNotFoundError(
-                        "Bu klasörde yalnız imzalı .appimage.hs_fs çıktısı bulundu. Bu dosya tekrar imzalanmaz; "
-                        "doğrulamak için Image İnceleme ekranını kullanın. Yeni imza için unsigned .mcelf veya "
-                        ".appimage çıktısının bulunduğu build klasörünü seçin."
-                    )
-                raise FileNotFoundError(
-                    "Seçilen klasörde unsigned .mcelf veya .appimage bulunamadı. CCS build konsolunda boot-image/"
-                    "post-build aşamasının başarıyla tamamlandığını kontrol edin; yalnız .out oluşması yeterli değildir."
-                )
+            scan = scan_ccs_application_build(directory)
+            self._ccs_scan = scan
+            self._ready_signed_input = None
+            self.ccs_actions.setVisible(False)
 
-            labels = [str(path.relative_to(root)) for path in candidates]
-            if len(candidates) == 1:
-                selected = candidates[0]
+            state = scan["state"]
+            recommended = scan.get("recommended")
+            if state == "READY_SIGNED" and recommended:
+                self.input.clear()
+                self._ready_signed_input = Path(recommended["path"])
+                signed_count = len(scan["signed"])
+                unsigned_count = len(scan["unsigned"])
+                self._set_discovery_status(
+                    f"✓ CCS/MCU+ SDK tarafından üretilmiş {signed_count} imzalı image bulundu. "
+                    f"Seçilen: {recommended['name']}. Certificate/image zaten hazır; tekrar imzalama gerekmez."
+                    + (f" Ayrıca {unsigned_count} unsigned girdi bulundu." if unsigned_count else ""),
+                    "statusPass",
+                )
+                self.ccs_verify_button.setVisible(True)
+                self.ccs_unsigned_button.setVisible(bool(scan["unsigned"]))
+                self.ccs_actions.setVisible(True)
+            elif state == "UNSIGNED_READY" and recommended:
+                self.input.setText(recommended["path"])
+                self._set_discovery_status(
+                    f"Unsigned build çıktısı bulundu ve seçildi: {recommended['name']}. "
+                    "Devam ederek mevcut veya yeni development/test key ile image hazırlayabilirsiniz.",
+                    "statusWarn",
+                )
+            elif state == "BUILD_INCOMPLETE":
+                self.input.clear()
+                self._set_discovery_status(
+                    "Yalnız linker .out çıktısı bulundu. CCS Build Console'da MCU+ SDK boot-image/post-build "
+                    "aşamasını tamamlayın; bu aşamada certificate veya key seçmeniz gerekmez.",
+                    "statusWarn",
+                )
             else:
-                chosen, accepted = QInputDialog.getItem(
-                    self,
-                    "Application build çıktısını seç",
-                    f"{len(candidates)} uygun unsigned çıktı bulundu:",
-                    labels,
-                    0,
-                    False,
+                self.input.clear()
+                self._set_discovery_status(
+                    "Bu klasörde tanınan application çıktısı bulunamadı. Önce CCS'te projeyi build edin, "
+                    "ardından projenin build/output klasörünü seçin.",
+                    "statusFail",
                 )
-                if not accepted:
-                    return
-                selected = candidates[labels.index(chosen)]
-
-            self.input.setText(str(selected))
-            self.discovery_status.setText(
-                f"✓ {len(candidates)} uygun unsigned build çıktısı bulundu; seçilen dosya: {selected.name}"
-            )
-            self.discovery_status.setObjectName("statusPass")
-            self.discovery_status.style().unpolish(self.discovery_status)
-            self.discovery_status.style().polish(self.discovery_status)
+            self._update_navigation_state()
         except Exception as exc:
-            show_guided_error(self, exc, context="CCS / MCU+ SDK build çıktısı bulunamadı")
+            show_guided_error(self, exc, context="CCS / MCU+ SDK build çıktısı taranamadı")
+
+    def _select_unsigned_ccs_input(self) -> None:
+        unsigned = (self._ccs_scan or {}).get("unsigned") or []
+        if not unsigned:
+            show_guided_error(
+                self,
+                FileNotFoundError("Bu build ağacında standalone signing için unsigned .appimage/.mcelf bulunamadı"),
+                context="Unsigned application seçilemedi",
+            )
+            return
+        if len(unsigned) == 1:
+            selected = unsigned[0]
+        else:
+            labels = [item["relative_path"] for item in unsigned]
+            chosen, accepted = QInputDialog.getItem(
+                self,
+                "Unsigned application seç",
+                f"{len(unsigned)} unsigned build çıktısı bulundu:",
+                labels,
+                0,
+                False,
+            )
+            if not accepted:
+                return
+            selected = unsigned[labels.index(chosen)]
+        self._ready_signed_input = None
+        self.input.setText(selected["path"])
+        self.ccs_actions.setVisible(False)
+        self._set_discovery_status(
+            f"Standalone/custom signing için unsigned girdi seçildi: {selected['name']}.",
+            "statusInfo",
+        )
+        self._update_navigation_state()
+
+    def _verify_ready_ccs_image(self) -> None:
+        try:
+            if self._ready_signed_input is None:
+                raise FileNotFoundError("Doğrulanacak hazır imzalı CCS image seçilmedi")
+            result = inspect_and_verify(str(self._ready_signed_input), verify=True).to_dict()
+            self.state.set_last_result(result)
+            self.result_view.set_result(result)
+            self._set_step(4)
+        except Exception as exc:
+            show_guided_error(self, exc, context="Hazır CCS secure application doğrulanamadı")
 
     def _protection_step(self) -> QWidget:
         page = QWidget()
