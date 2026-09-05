@@ -46,3 +46,36 @@ def test_generated_key_status_is_share_safe():
     assert 'DER-SPKI SHA-256: {fingerprint}' in page
     status_tail = page.split('"✓ Development/test signing key oluşturuldu', 1)[1].split('"statusPass"', 1)[0]
     assert 'private_path' not in status_tail
+
+def test_certificate_and_application_wizards_are_scrollable():
+    certificate = _source("pages/certificate.py")
+    application = _source("pages/application.py")
+    for source in (certificate, application):
+        assert 'QScrollArea()' in source
+        assert 'setWidgetResizable(True)' in source
+        assert 'setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)' in source
+
+
+def test_guided_application_certificate_routes_to_standard_ccs_workflow():
+    page = _source("pages/certificate_enhanced.py")
+    for token in [
+        "Application için standart yol: CCS / MCU+ SDK build",
+        "CCS / Secure Application Akışını Aç",
+        'self.navigate.emit("application")',
+        'self.state.mode != "expert"',
+        "self.create_wizard_scroll.setVisible(not guided_application)",
+    ]:
+        assert token in page
+
+
+def test_application_wizard_can_discover_unsigned_ccs_build_outputs():
+    page = _source("pages/application.py")
+    for token in [
+        "CCS / MCU+ SDK build çıktısını bul",
+        "Build Klasörünü Tara",
+        'for pattern in ("*.mcelf", "*.appimage")',
+        "QInputDialog.getItem",
+        "yalnız imzalı .appimage.hs_fs çıktısı bulundu",
+        "yalnız .out oluşması yeterli değildir",
+    ]:
+        assert token in page
