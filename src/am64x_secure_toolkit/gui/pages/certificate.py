@@ -468,7 +468,16 @@ class CertificatePage(QWidget):
         rl.addWidget(self.create_result, 1)
         self.create_wizard.addWidget(review)
 
-        root.addWidget(self.create_wizard, 1)
+        # Keep the active wizard step reachable at ordinary laptop/window sizes.
+        # QStackedWidget otherwise advertises the tallest step and Qt compresses
+        # line edits before offering any way to scroll.
+        self.create_wizard_scroll = QScrollArea()
+        self.create_wizard_scroll.setObjectName("wizardScroll")
+        self.create_wizard_scroll.setWidgetResizable(True)
+        self.create_wizard_scroll.setFrameShape(QFrame.NoFrame)
+        self.create_wizard_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.create_wizard_scroll.setWidget(self.create_wizard)
+        root.addWidget(self.create_wizard_scroll, 1)
 
         nav = QHBoxLayout()
         self.create_back = QPushButton("← Geri"); self.create_back.clicked.connect(self._prev_create_step)
