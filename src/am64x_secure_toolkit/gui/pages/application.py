@@ -217,11 +217,11 @@ class ApplicationPage(QWidget):
         page = QWidget(); layout = QVBoxLayout(page)
         layout.addWidget(self._card(
             "1 · Application",
-            "Build etmek istediğiniz MCELF application dosyasını seçin."
+            "CCS/MCU+ SDK build sonrasında oluşan unsigned application çıktısını seçin veya build klasörünü taratın."
         ))
         form = QFormLayout()
-        self.input, box = file_field(page, "MCELF application dosyası seç")
-        self.input.setPlaceholderText("MCELF (.mcelf) application dosyası seçin")
+        self.input, box = file_field(page, "Unsigned .mcelf veya .appimage dosyası seç")
+        self.input.setPlaceholderText("Unsigned .mcelf/.appimage seçin veya Build Klasörünü Tara'yı kullanın")
         form.addRow("Application dosyası", box)
         layout.addLayout(form)
 
