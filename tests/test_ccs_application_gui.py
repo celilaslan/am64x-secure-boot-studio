@@ -31,6 +31,8 @@ def test_application_flow_keeps_unsigned_custom_signing_as_secondary_path():
         "Gerekirse: unsigned girdiyi doğrudan seç",
         "Kendi Key'imle Yeni Image Hazırla",
         "Standalone/custom signing için unsigned girdi seçildi",
+        "self.manual_input_card.setVisible(expert)",
+        'STEP_NAMES = ("CCS Build", "Key ve Koruma"',
     ]:
         assert token in page
 
