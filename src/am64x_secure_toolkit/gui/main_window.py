@@ -72,7 +72,7 @@ class MainWindow(QMainWindow):
             ("guide", "Bana Yol Göster", GuidePage(self.state)),
             ("environment", "Environment", EnvironmentPage(self.state)),
             ("project", "Proje", ProjectPage(self.state)),
-            ("application", "Secure Application", ApplicationPage(self.state)),
+            ("application", "CCS / Secure Application", ApplicationPage(self.state)),
             ("rom", "ROM Image", RomPage(self.state)),
             ("inspector", "Image İnceleme", InspectorPage(self.state)),
             ("certificate", "Certificate Center", CertificatePage(self.state)),
