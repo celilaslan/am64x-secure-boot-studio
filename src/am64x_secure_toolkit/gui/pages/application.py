@@ -41,7 +41,7 @@ class ApplicationPage(QWidget):
         self._ccs_scan: dict | None = None
         self._ready_signed_input: Path | None = None
         root = QVBoxLayout(self)
-        title = QLabel("Secure Application Oluştur")
+        title = QLabel("CCS / Secure Application")
         title.setObjectName("pageTitle")
         root.addWidget(title)
         intro = QLabel(
