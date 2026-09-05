@@ -11,8 +11,10 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QInputDialog,
     QPushButton,
     QRadioButton,
+    QScrollArea,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
@@ -62,7 +64,14 @@ class ApplicationPage(QWidget):
         self.stack.addWidget(self._output_step())
         self.stack.addWidget(self._review_step())
         self.stack.addWidget(self._result_step())
-        root.addWidget(self.stack, 1)
+        # Keep every step usable when Studio is not maximized.
+        self.stack_scroll = QScrollArea()
+        self.stack_scroll.setObjectName("wizardScroll")
+        self.stack_scroll.setWidgetResizable(True)
+        self.stack_scroll.setFrameShape(QFrame.NoFrame)
+        self.stack_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.stack_scroll.setWidget(self.stack)
+        root.addWidget(self.stack_scroll, 1)
 
         nav = QHBoxLayout()
         self.back = QPushButton("← Geri")
@@ -216,6 +225,31 @@ class ApplicationPage(QWidget):
         form.addRow("Application dosyası", box)
         layout.addLayout(form)
 
+        discovery = QFrame()
+        discovery.setObjectName("infoCard")
+        discovery_layout = QHBoxLayout(discovery)
+        discovery_text = QVBoxLayout()
+        discovery_title = QLabel("CCS / MCU+ SDK build çıktısını bul")
+        discovery_title.setObjectName("sectionTitle")
+        discovery_note = QLabel(
+            "Dosya adını veya yerini bilmeniz gerekmiyor. CCS'te proje build edildikten sonra proje ya da build "
+            "klasörünü seçin; Studio unsigned .mcelf ve .appimage adaylarını tarayıp size gösterir. "
+            "Yalnız .out varsa SDK boot-image/post-build aşaması henüz tamamlanmamıştır."
+        )
+        discovery_note.setWordWrap(True)
+        discovery_note.setObjectName("mutedText")
+        discovery_text.addWidget(discovery_title)
+        discovery_text.addWidget(discovery_note)
+        discovery_layout.addLayout(discovery_text, 1)
+        discover_button = QPushButton("Build Klasörünü Tara")
+        discover_button.clicked.connect(self._choose_application_build_dir)
+        discovery_layout.addWidget(discover_button)
+        layout.addWidget(discovery)
+        self.discovery_status = QLabel("Henüz build klasörü taranmadı.")
+        self.discovery_status.setWordWrap(True)
+        self.discovery_status.setObjectName("mutedText")
+        layout.addWidget(self.discovery_status)
+
         self.sdk_status_card = QFrame()
         self.sdk_status_card.setObjectName("infoCard")
         sdk_status_layout = QHBoxLayout(self.sdk_status_card)
@@ -246,6 +280,66 @@ class ApplicationPage(QWidget):
 
         layout.addStretch(1)
         return page
+
+    def _choose_application_build_dir(self) -> None:
+        directory = QFileDialog.getExistingDirectory(
+            self,
+            "CCS / MCU+ SDK proje veya build klasörünü seç",
+        )
+        if not directory:
+            return
+        root = Path(directory)
+        try:
+            candidates: list[Path] = []
+            for pattern in ("*.mcelf", "*.appimage"):
+                candidates.extend(path for path in root.rglob(pattern) if path.is_file())
+            unique = {str(path.resolve()).casefold(): path for path in candidates}
+            candidates = sorted(
+                unique.values(),
+                key=lambda path: path.stat().st_mtime,
+                reverse=True,
+            )
+            if not candidates:
+                signed = next(
+                    (path for path in root.rglob("*.appimage.hs_fs") if path.is_file()),
+                    None,
+                )
+                if signed is not None:
+                    raise FileNotFoundError(
+                        "Bu klasörde yalnız imzalı .appimage.hs_fs çıktısı bulundu. Bu dosya tekrar imzalanmaz; "
+                        "doğrulamak için Image İnceleme ekranını kullanın. Yeni imza için unsigned .mcelf veya "
+                        ".appimage çıktısının bulunduğu build klasörünü seçin."
+                    )
+                raise FileNotFoundError(
+                    "Seçilen klasörde unsigned .mcelf veya .appimage bulunamadı. CCS build konsolunda boot-image/"
+                    "post-build aşamasının başarıyla tamamlandığını kontrol edin; yalnız .out oluşması yeterli değildir."
+                )
+
+            labels = [str(path.relative_to(root)) for path in candidates]
+            if len(candidates) == 1:
+                selected = candidates[0]
+            else:
+                chosen, accepted = QInputDialog.getItem(
+                    self,
+                    "Application build çıktısını seç",
+                    f"{len(candidates)} uygun unsigned çıktı bulundu:",
+                    labels,
+                    0,
+                    False,
+                )
+                if not accepted:
+                    return
+                selected = candidates[labels.index(chosen)]
+
+            self.input.setText(str(selected))
+            self.discovery_status.setText(
+                f"✓ {len(candidates)} uygun unsigned build çıktısı bulundu; seçilen dosya: {selected.name}"
+            )
+            self.discovery_status.setObjectName("statusPass")
+            self.discovery_status.style().unpolish(self.discovery_status)
+            self.discovery_status.style().polish(self.discovery_status)
+        except Exception as exc:
+            show_guided_error(self, exc, context="CCS / MCU+ SDK build çıktısı bulunamadı")
 
     def _protection_step(self) -> QWidget:
         page = QWidget()
