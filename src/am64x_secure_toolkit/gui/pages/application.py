@@ -267,6 +267,14 @@ class ApplicationPage(QWidget):
         self.ccs_actions.setVisible(False)
         layout.addWidget(self.ccs_actions)
 
+        layout.addWidget(self._card(
+            "Hangi durumda ne olacak?",
+            "Hazır .appimage.hs_fs varsa certificate ve key seçmeden doğrulayın. "
+            "Kendi development/test key'inizle yeni image gerekiyorsa Studio aynı build ağacındaki unsigned girdiyi seçer; "
+            "bir sonraki adımda key'i seçebilir veya oluşturabilirsiniz ve application X.509 certificate TI signer tarafından "
+            "otomatik eklenir. HS-SE target kabulü için kullanılan key'in provision edilmiş customer Root of Trust ile eşleşmesi ayrıca gerekir."
+        ))
+
         self.manual_input_card = QFrame()
         manual = self.manual_input_card
         manual.setObjectName("infoCard")
