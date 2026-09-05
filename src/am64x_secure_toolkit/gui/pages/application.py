@@ -22,8 +22,9 @@ from PySide6.QtWidgets import (
 
 from ...services.ccs_build import scan_ccs_application_build
 from ...services.environment import resolve_environment
-from ...services.project import suggest_project_output
+from ...services.project import path_is_within_project, suggest_project_output
 from ...workflows.application import application_build_workflow
+from ...workflows.keys import generate_keys_workflow
 from ...workflows.inspect import inspect_and_verify
 from ..widgets import HumanResultView
 from .common import file_field, require_field, set_field_invalid, show_guided_error
@@ -441,12 +442,18 @@ class ApplicationPage(QWidget):
         key_help = QFrame()
         key_help.setObjectName("infoCard")
         key_help_layout = QHBoxLayout(key_help)
-        help_text = QLabel("Development/test key'iniz yok mu? Synthetic, non-production bir test key set'i oluşturabilirsiniz.")
+        help_text = QLabel(
+            "Development/test key'iniz yoksa bu akıştan çıkmadan RSA-4096 test signing key oluşturabilirsiniz. "
+            "Bu key customer Root of Trust değildir ve production/provisioning key'i olarak kabul edilmez."
+        )
         help_text.setWordWrap(True)
         help_text.setObjectName("mutedText")
         key_help_layout.addWidget(help_text, 1)
-        key_center = QPushButton("Test key set'i oluştur")
+        generate_key = QPushButton("Yeni Test Signing Key Oluştur ve Kullan")
+        generate_key.clicked.connect(self._generate_application_signing_key)
+        key_center = QPushButton("Key Center")
         key_center.clicked.connect(lambda: self.navigate.emit("keys"))
+        key_help_layout.addWidget(generate_key, 0)
         key_help_layout.addWidget(key_center, 0)
         layout.addWidget(key_help)
 
@@ -486,6 +493,20 @@ class ApplicationPage(QWidget):
         )
         layout.addWidget(self.mek_card)
 
+        self.mek_generate_help = QFrame()
+        self.mek_generate_help.setObjectName("infoCard")
+        mek_generate_layout = QHBoxLayout(self.mek_generate_help)
+        mek_generate_text = QLabel(
+            "Development/test şifreleme denemesi için yeni AES-256 application MEK oluşturup doğrudan kullanabilirsiniz."
+        )
+        mek_generate_text.setWordWrap(True)
+        mek_generate_text.setObjectName("mutedText")
+        mek_generate_layout.addWidget(mek_generate_text, 1)
+        generate_mek = QPushButton("Yeni Test MEK Oluştur ve Kullan")
+        generate_mek.clicked.connect(self._generate_application_mek)
+        mek_generate_layout.addWidget(generate_mek)
+        layout.addWidget(self.mek_generate_help)
+
         layout.addWidget(self._card(
             "Güvenlik sınırı",
             "Bu adım yalnız host üzerinde image hazırlamak içindir. Key seçmek veya image üretmek customer Root of Trust "
@@ -494,6 +515,66 @@ class ApplicationPage(QWidget):
         layout.addStretch(1)
         self._toggle_encryption(False)
         return page
+
+    def _choose_secret_output_dir(self, title: str) -> Path | None:
+        directory = QFileDialog.getExistingDirectory(self, title)
+        if not directory:
+            return None
+        output_dir = Path(directory).expanduser().resolve()
+        if self.state.project is not None and path_is_within_project(self.state.project, output_dir):
+            raise ValueError(
+                "Private key veya MEK Project Workspace içine üretilemez. Project dışında ayrı korumalı bir dizin seçin."
+            )
+        return output_dir
+
+    @staticmethod
+    def _single_generated_secret(workflow, output_dir: Path) -> Path:
+        data = workflow.to_dict()
+        if data.get("status") != "PASS":
+            raise ValueError(data.get("summary") or "Key generation başarısız")
+        details = data.get("safe_details") if isinstance(data.get("safe_details"), dict) else {}
+        secret_files = details.get("secret_files_created") or []
+        if len(secret_files) != 1:
+            raise ValueError("Key generation beklenen tek secret dosyasını üretmedi")
+        return output_dir / str(secret_files[0])
+
+    def _generate_application_signing_key(self) -> None:
+        try:
+            output_dir = self._choose_secret_output_dir(
+                "Development/test signing key için Project dışında korumalı bir klasör seç"
+            )
+            if output_dir is None:
+                return
+            workflow = generate_keys_workflow(output_dir, kind="signing", role="application")
+            private_path = self._single_generated_secret(workflow, output_dir)
+            self.signing.setText(str(private_path))
+            self._set_secret_status(
+                self.signing_status,
+                f"✓ Yeni development/test RSA-4096 signing key oluşturuldu ve seçildi: {private_path.name}",
+                "statusPass",
+            )
+            self._update_navigation_state()
+        except Exception as exc:
+            show_guided_error(self, exc, context="Application signing key üretilemedi")
+
+    def _generate_application_mek(self) -> None:
+        try:
+            output_dir = self._choose_secret_output_dir(
+                "Development/test application MEK için Project dışında korumalı bir klasör seç"
+            )
+            if output_dir is None:
+                return
+            workflow = generate_keys_workflow(output_dir, kind="mek", role="application")
+            mek_path = self._single_generated_secret(workflow, output_dir)
+            self.mek.setText(str(mek_path))
+            self._set_secret_status(
+                self.mek_status,
+                "✓ Yeni development/test AES-256 application MEK oluşturuldu ve seçildi.",
+                "statusPass",
+            )
+            self._update_navigation_state()
+        except Exception as exc:
+            show_guided_error(self, exc, context="Application MEK üretilemedi")
 
     def _output_step(self) -> QWidget:
         page = QWidget(); layout = QVBoxLayout(page)
@@ -636,6 +717,7 @@ class ApplicationPage(QWidget):
 
     def _toggle_encryption(self, enabled: bool) -> None:
         self.mek_card.setVisible(enabled)
+        self.mek_generate_help.setVisible(enabled)
         if not enabled:
             self.mek.setProperty("invalid", False)
             self.mek.style().unpolish(self.mek)
