@@ -72,8 +72,7 @@ class CertificatePage(_BaseCertificatePage):
         if self._create_progress is not None:
             self._create_progress.setVisible(not guided_application)
         self.create_wizard_scroll.setVisible(not guided_application)
-        self.create_back.setVisible(not guided_application)
-        self.create_next.setVisible(not guided_application)
+        self.create_nav.setVisible(not guided_application)
 
     def _refresh_mode_ui(self, *_args) -> None:
         super()._refresh_mode_ui(*_args)
