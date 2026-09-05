@@ -47,10 +47,11 @@ class CertificatePage(_BaseCertificatePage):
         route_title = QLabel("Application için standart yol: CCS / MCU+ SDK build")
         route_title.setObjectName("sectionTitle")
         route_text = QLabel(
-            "Normal kullanımda Destination Address, Host ID ve processor flag alanlarını burada elle doldurmanız gerekmez. "
-            "Önce CCS/MCU+ SDK ile application projesini build edin; Secure Application ekranı build klasöründeki "
-            "unsigned .mcelf veya .appimage girdisini bulur ve resmi TI signer akışını kullanır. "
-            "Bu ham certificate formu yalnız Uzman Modu'ndaki standalone/integration çalışmaları içindir."
+            "Normal kullanımda application certificate'ını elle oluşturmanız veya Destination Address, Host ID ve "
+            "processor flag alanlarını doldurmanız gerekmez. CCS/MCU+ SDK secure build sırasında gerekli X.509 yapısını "
+            "TI signer ile image'a ekler. Secure Application ekranı hazır .appimage.hs_fs çıktısını doğrudan doğrular; "
+            "yalnız custom/standalone signing gerektiğinde unsigned .appimage/.mcelf ve seçilen key ile yeni image üretir. "
+            "Bu ham certificate formu yalnız Uzman Modu'ndaki özel entegrasyon çalışmaları içindir."
         )
         route_text.setWordWrap(True)
         route_text.setObjectName("mutedText")
