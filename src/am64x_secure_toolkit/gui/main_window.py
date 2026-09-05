@@ -7,7 +7,7 @@ from ..services.ui_contract import page_visible
 from ..services.presentation import result_presentation
 from .pages.application import ApplicationPage
 from .pages.boardcfg import BoardCfgPage
-from .pages.certificate import CertificatePage
+from .pages.certificate_enhanced import CertificatePage
 from .pages.environment import EnvironmentPage
 from .pages.errata import ErrataPage
 from .pages.generic_data import GenericDataPage
