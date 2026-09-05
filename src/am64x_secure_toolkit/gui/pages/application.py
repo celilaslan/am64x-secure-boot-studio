@@ -33,7 +33,7 @@ from .common import file_field, require_field, set_field_invalid, show_guided_er
 class ApplicationPage(QWidget):
     navigate = Signal(str)
 
-    STEP_NAMES = ("Application", "Koruma", "Çıktı", "Kontrol", "Sonuç")
+    STEP_NAMES = ("CCS Build", "Key ve Koruma", "Çıktı", "Kontrol", "Sonuç")
 
     def __init__(self, state) -> None:
         super().__init__()
@@ -45,8 +45,8 @@ class ApplicationPage(QWidget):
         title.setObjectName("pageTitle")
         root.addWidget(title)
         intro = QLabel(
-            "Adım adım ilerleyin. Studio gerekli ön kontrolleri yapar ve MCU+ SDK içindeki resmi "
-            "appimage_x509_cert_gen.py aracını kullanır. Image üretim mantığını yeniden uygulamaz."
+            "CCS build klasörünü seçin. Hazır imzalı HS-FS image varsa Studio doğrudan doğrular; "
+            "yalnız custom image gerektiğinde key seçimi/üretimi ve resmi TI signer akışına geçer."
         )
         intro.setWordWrap(True)
         intro.setObjectName("mutedText")
@@ -267,7 +267,8 @@ class ApplicationPage(QWidget):
         self.ccs_actions.setVisible(False)
         layout.addWidget(self.ccs_actions)
 
-        manual = QFrame()
+        self.manual_input_card = QFrame()
+        manual = self.manual_input_card
         manual.setObjectName("infoCard")
         manual_layout = QVBoxLayout(manual)
         manual_title = QLabel("Gerekirse: unsigned girdiyi doğrudan seç")
@@ -653,6 +654,7 @@ class ApplicationPage(QWidget):
         expert = self.state.mode == "expert"
         self.sdk_expert_label.setVisible(expert)
         self.sdk_expert_box.setVisible(expert)
+        self.manual_input_card.setVisible(expert)
 
     def _application_input_ready(self) -> bool:
         value = self.input.text().strip()
