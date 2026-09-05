@@ -1,0 +1,18 @@
+type: security_boardcfg_policy
+secure_debug:
+  subhdr_magic: '0x42AF'
+  allow_jtag_unlock: 0
+  allow_wildcard_unlock: 0
+  allow_debug_level_rsvd: 0
+  rsvd: 0
+  min_cert_rev: 0
+  jtag_unlock_hosts:
+  - 0
+  - 0
+  - 0
+  - 0
+extended_otp:
+  subhdr_magic: '0x4081'
+  write_host: null
+notes: Bu profile yalnız Security Board Configuration policy alanlarını temsil eder.
+  Toolkit target'a BoardCfg göndermez, debug açmaz ve revision yazma çağrısı yapmaz.

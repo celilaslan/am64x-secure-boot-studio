@@ -1,0 +1,18 @@
+type: application
+subject:
+  common_name: AM64x Secure Application
+  organization: <COMPANY_OR_PROJECT_NAME>
+input: <PAYLOAD_PATH>
+software_revision: 1
+load:
+  dest_addr: <SOURCE_VERIFIED_VALUE>
+  auth_mode: 1
+  copy_as_host: 0
+boot:
+  enabled: false
+  boot_core: null
+  config_flags_set: 0
+  config_flags_clr: 0
+  reset_vector: null
+  field_valid: 0
+valid_days: 3650

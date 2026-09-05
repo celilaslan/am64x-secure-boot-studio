@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "am64x-secure-toolkit"
+version = "2.0.0a26"
+description = "AM64x/AM6442 Secure Boot Studio: guided GUI + CLI host-side security workflow toolkit"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "Celil Aslan"}]
+dependencies = [
+  "cryptography>=41",
+  "asn1crypto>=1.5",
+  "PyYAML>=6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+bundle = ["PyInstaller>=6.10,<7"]
+gui = ["PySide6>=6.5,<7"]
+all = ["PySide6>=6.5,<7", "PyInstaller>=6.10,<7"]
+
+[project.scripts]
+securectl = "am64x_secure_toolkit.cli:main"
+securestudio = "am64x_secure_toolkit.gui:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

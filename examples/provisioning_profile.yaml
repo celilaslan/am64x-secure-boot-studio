@@ -1,0 +1,12 @@
+type: hsfs_to_hsse_preflight
+mode: offline_only
+key_count: null
+key_revision: null
+smpk_public_der: <SMPK_PUBLIC_DER_PATH>
+bmpk_public_der: null
+swrev:
+  sysfw: null
+  sbl: null
+  boardcfg: null
+notes: Bu dosyaya private key, SMEK/BMEK değeri veya secret path yazılmaz. Araç OTP
+  Keywriter çalıştırmaz ve eFuse programlamaz.

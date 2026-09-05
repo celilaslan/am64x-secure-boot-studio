@@ -1,0 +1,4 @@
+cryptography==46.0.4
+asn1crypto==1.5.1
+PyYAML==6.0.3
+pytest==9.0.2

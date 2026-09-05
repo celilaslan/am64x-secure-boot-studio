@@ -72,7 +72,7 @@ pytest -q
 GUI dahil geliştirme kurulumu:
 
 ```bash
-pip install -e "[dev,gui]"
+pip install -e ".[dev,gui]"
 ```
 
 CLI-only install PySide6 gerektirmez.
@@ -118,7 +118,7 @@ securectl build app \
 Masaüstü arayüzünü açmak için:
 
 ```bash
-pip install "[gui]"
+pip install ".[gui]"
 securestudio
 # veya
 securectl gui
@@ -202,9 +202,11 @@ Ayrıntılı sınırlar için `docs/SECURITY_BOUNDARY.md` dosyasına bakın.
 
 Toolkit'teki AM64x/TISCI kuralları, sürüme özgü resmi TI kaynaklarına ve projede incelenen kurulu MCU+ SDK source dosyalarına dayandırılmıştır. Kaynakların hangi modülde kullanıldığı `docs/SOURCES.md` içinde özetlenmiştir.
 
+
 ## v2.0.0-alpha3 guided learning
 
 Studio now includes **Bana Yol Göster**, **Source Trace**, **Öğren**, a result **Neden?** panel and a **5 Dakikalık Demo**. The demo is explicitly educational / synthetic / non-production / unprovisioned and NOT_TARGET_READY; exact target values are not invented.
+
 
 ## v2.0.0-alpha5 GUI completeness + semantic hardening
 
@@ -218,19 +220,24 @@ Alpha5, Phase 8 release hazırlığının yanında beginner-facing GUI completen
 - Inspector drag-and-drop ile read-only inspect açabilir.
 - Errata GUI değerleri backend canonical enum'larıyla ortak `ui_contract` üzerinden kilitlenmiştir.
 
+
 Alpha4 adds high-DPI/accessibility preparation, explicit no-SDK/offline behavior, release secret/path scanning and standalone packaging recipes. Cross-platform release readiness is **PARTIAL** until real PySide6 render and clean Linux/Windows standalone smoke tests are executed.
+
 
 ## v2.0.0-alpha7 product polish
 
 Alpha7, alpha6'nın insan-okunur result ve Application Wizard temelini ileri taşır. ROM Combined Image artık adım-adım wizard'dır; Certificate Explorer tree/detail görünümünde certificate context, consumer, OID, decoded value, claim sınırı ve source'u birlikte gösterir. Key Center application ve provisioning key rollerini görsel olarak ayırır ve public identity metadata'sını secret-safe biçimde sunar. Ana Sayfa Environment / Project / Son İşlem kartları ve açıklamalı task cards ile dashboard olarak çalışır.
 
+
 ## v2.0.0-alpha8 visual semantic polish
 
 Alpha8, advanced ekranları aynı beginner-readable görsel dile taşır. SDK Inspector application ve ROM/SBL encryption consumer chain'lerini ayrı diagram lane'lerinde gösterir; Provisioning, KEYREV/SWREV ve Security BoardCfg ekranları semantic flow + human result görünümünü kullanır. Certificate Explorer seçilen extension'ı Image Anatomy üzerinde ilgili blokla ilişkilendirir. Her result check satırında source-aware **Neden?** açıklaması vardır. Studio hiçbir missing target ID/address/offset'i tahmin etmez ve offline/host-side sonucu hardware enforcement'a yükseltmez.
 
+
 ## v2.0.0-alpha9 advanced UX + project history
 
 Alpha9 Secure Debug ve Generic Data ekranlarını raw JSON'dan çıkarıp ortak semantic flow + human result sistemine taşır. SDK Compare old/new source pair'lerini role-based side-by-side semantic diff olarak gösterir. Project Workspace aktifken workflow sonuçları secret/full-host-path içermeyen compact `sessions/activity.jsonl` history'ye yazılır; Reports içindeki Project History sekmesinden tekrar okunabilir. Bu persistence hardware evidence üretmez ve secret custody mekanizması değildir.
+
 
 ## v2.0.0-alpha11 beta-hardening + diagnostics
 
@@ -243,6 +250,7 @@ Alpha10, Studio'yu ilk kez kullanan biri için **Environment → Project → Wor
 ## v2.0.0-alpha13 Home/Dashboard visual polish
 
 Alpha12 is a focused real-Linux screenshot-driven polish pass. The Home page now uses compact context chips, concise Environment/Project/Last Operation cards and six beginner-facing primary tasks. Advanced tools remain accessible from Expert Mode instead of being duplicated on the Home dashboard. Card text backgrounds are explicitly transparent to avoid disabled-input-like grey strips on Linux desktop styles, and status-bar messages are kept short. Security execution boundaries are unchanged.
+
 
 ### Alpha13 visual QA note
 

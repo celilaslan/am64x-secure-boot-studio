@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=AM64x Secure Boot Studio
+Comment=Guided host-side AM64x Secure Boot workflows
+Exec=AM64x-Secure-Boot-Studio
+Terminal=false
+Categories=Development;Engineering;

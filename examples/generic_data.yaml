@@ -1,0 +1,13 @@
+type: generic_data
+subject:
+  common_name: AM64x Authenticated Data
+  organization: <COMPANY_OR_PROJECT_NAME>
+input: <DATA_FILE>
+software_revision: 1
+load:
+  dest_addr: <SOURCE_VERIFIED_VALUE>
+  auth_mode: 1
+  copy_as_host: <SOURCE_VERIFIED_VALUE>
+encryption:
+  enabled: false
+valid_days: 3650

@@ -1,0 +1,15 @@
+type: debug
+subject:
+  common_name: AM64x Secure Debug Certificate
+  organization: <COMPANY_OR_PROJECT_NAME>
+software_revision: 1
+debug:
+  soc_uid: <64_HEX_SOC_UID>
+  wildcard_uid: false
+  privilege: 0
+  reserved: 0
+  nonsecure_core_ids:
+  - 255
+  secure_core_ids:
+  - 255
+valid_days: 3650
