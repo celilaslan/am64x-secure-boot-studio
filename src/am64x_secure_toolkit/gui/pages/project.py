@@ -182,7 +182,7 @@ class ProjectPage(QWidget):
         policy.setObjectName("mutedText")
         cc.addWidget(policy)
         project_actions = QHBoxLayout()
-        app_btn = QPushButton("Secure Application Oluştur")
+        app_btn = QPushButton("CCS / Secure Application")
         app_btn.setObjectName("primaryAction")
         app_btn.clicked.connect(lambda: self.navigate.emit("application"))
         inspect_btn = QPushButton("Image İncele")
