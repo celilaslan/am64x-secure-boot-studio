@@ -47,6 +47,7 @@ def test_generated_key_status_is_share_safe():
     status_tail = page.split('"✓ Development/test signing key oluşturuldu', 1)[1].split('"statusPass"', 1)[0]
     assert 'private_path' not in status_tail
 
+
 def test_certificate_and_application_wizards_are_scrollable():
     certificate = _source("pages/certificate.py")
     application = _source("pages/application.py")
@@ -64,6 +65,7 @@ def test_guided_application_certificate_routes_to_standard_ccs_workflow():
         'self.navigate.emit("application")',
         'self.state.mode != "expert"',
         "self.create_wizard_scroll.setVisible(not guided_application)",
+        "self.create_nav.setVisible(not guided_application)",
     ]:
         assert token in page
 
@@ -77,5 +79,6 @@ def test_application_wizard_can_discover_unsigned_ccs_build_outputs():
         "QInputDialog.getItem",
         "yalnız imzalı .appimage.hs_fs çıktısı bulundu",
         "yalnız .out oluşması yeterli değildir",
+        "Unsigned .mcelf/.appimage seçin veya Build Klasörünü Tara'yı kullanın",
     ]:
         assert token in page
