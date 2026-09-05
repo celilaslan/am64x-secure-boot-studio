@@ -78,7 +78,7 @@ class HomePage(QWidget):
         self.grid.setVerticalSpacing(10)
         primary_tasks = [
             ("Emin Değilim — Bana Yol Göster", "Birkaç basit soruyla doğru işleme yönlendirir.", "guide", True),
-            ("CCS / Secure Application", "CCS build çıktısını bulun, hazır HS-FS image'ı doğrulayın veya gerektiğinde yeni image hazırlayın.", "application", False),
+            ("CCS / Secure Application", "CCS projesini seçin; Studio lifecycle, key, TI signer ve doğrulama adımlarını yönetsin.", "application", False),
             ("Image Doğrula / İncele", "Image veya certificate yapısını okuyun ve host-side kontrolleri çalıştırın.", "inspector", False),
             ("Key Hazırla / Kontrol Et", "Development key set oluşturun veya mevcut key material'i kontrol edin.", "keys", False),
             ("Environment Kontrolü", "SDK, Python/OpenSSL ve TI signer durumunu kontrol edin.", "environment", False),

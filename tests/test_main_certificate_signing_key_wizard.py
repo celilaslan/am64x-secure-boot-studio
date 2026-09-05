@@ -73,12 +73,12 @@ def test_guided_application_certificate_routes_to_standard_ccs_workflow():
 def test_application_wizard_can_discover_unsigned_ccs_build_outputs():
     page = _source("pages/application.py")
     for token in [
-        "CCS / MCU+ SDK build çıktısını bul",
-        "Build Klasörünü Tara",
-        'for pattern in ("*.mcelf", "*.appimage")',
+        "CCS proje veya build klasörünü seç",
+        "CCS Proje / Build Klasörünü Seç",
+        "scan_ccs_application_build(directory)",
         "QInputDialog.getItem",
-        "yalnız imzalı .appimage.hs_fs çıktısı bulundu",
-        "yalnız .out oluşması yeterli değildir",
-        "Unsigned .mcelf/.appimage seçin veya Build Klasörünü Tara'yı kullanın",
+        "Certificate/image zaten hazır; tekrar imzalama gerekmez.",
+        "Yalnız linker .out çıktısı bulundu.",
+        ".mcelf dosyasını sizin bulmanız gerekmez.",
     ]:
         assert token in page

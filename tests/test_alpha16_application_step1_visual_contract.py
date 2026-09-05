@@ -10,10 +10,10 @@ def _text() -> str:
 
 def test_alpha16_application_step1_is_beginner_facing():
     text = _text()
-    assert '"1 · Application"' in text
-    assert '"Build etmek istediğiniz MCELF application dosyasını seçin."' in text
-    assert 'form.addRow("Application dosyası", box)' in text
-    assert 'MCELF (.mcelf) application dosyası seçin' in text
+    assert '"1 · CCS / MCU+ SDK Build"' in text
+    assert 'QPushButton("CCS Proje / Build Klasörünü Seç")' in text
+    assert 'QPushButton("Studio ile Secure Build Et")' in text
+    assert '.mcelf dosyasını sizin bulmanız gerekmez' in text
     assert '"1 · Application ve SDK"' not in text
     assert 'form.addRow("Application input", box)' not in text
 
@@ -38,6 +38,6 @@ def test_alpha16_next_is_disabled_until_current_step_is_ready():
 
 def test_alpha16_normal_ui_uses_cikti_not_output_in_step_bar():
     text = _text()
-    assert 'STEP_NAMES = ("Application", "Koruma", "Çıktı", "Kontrol", "Sonuç")' in text
+    assert 'STEP_NAMES = ("CCS Build", "Key ve Koruma", "Çıktı", "Kontrol", "Sonuç")' in text
     assert '"3 · Çıktı"' in text
     assert 'form.addRow("Çıktı dosyası", box)' in text

@@ -10,7 +10,7 @@ def test_home_dashboard_is_compact_and_beginner_first():
     assert 'primary_tasks = [' in home
     for label in (
         "Emin Değilim — Bana Yol Göster",
-        "Secure Application Oluştur",
+        "CCS / Secure Application",
         "Image Doğrula / İncele",
         "Key Hazırla / Kontrol Et",
         "Environment Kontrolü",

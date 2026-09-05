@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.0-alpha27
+
+- Added a lifecycle-aware **Studio Secure Build** path for CCS/MCU+ SDK projects.
+- HS-FS maps to the SDK `DEVICE_TYPE=GP` recipe; HS-SE maps to `DEVICE_TYPE=HS` and requires a customer signing key.
+- Studio can run the project's own makefile, pass signing/encryption inputs through a temporary secret-safe stage, discover the resulting `.appimage.hs_fs`/`.appimage.hs`, and perform post-build certificate/image verification.
+- The normal Application journey no longer requires the user to locate `.mcelf`, enter X.509 fields, or edit global `devconfig.mak`.
+- Existing manual standalone signing remains available as an Expert/secondary path.
+- Automated suite: 269 tests pass in the development environment. Real Windows/CCS build validation remains pending.
+
 ## 2.0.0-alpha26
 
 - Real Windows alpha25 Step 2 visual-QA patch for Certificate Center → Application TI fields.

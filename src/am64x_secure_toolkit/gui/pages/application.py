@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 )
 
 from ...services.ccs_build import scan_ccs_application_build
+from ...services.ccs_secure_build import run_mcu_plus_secure_build
 from ...services.environment import resolve_environment
 from ...services.project import path_is_within_project, suggest_project_output
 from ...workflows.application import application_build_workflow
@@ -39,14 +40,15 @@ class ApplicationPage(QWidget):
         super().__init__()
         self.state = state
         self._ccs_scan: dict | None = None
+        self._ccs_build_root: Path | None = None
         self._ready_signed_input: Path | None = None
         root = QVBoxLayout(self)
         title = QLabel("CCS / Secure Application")
         title.setObjectName("pageTitle")
         root.addWidget(title)
         intro = QLabel(
-            "CCS build klasörünü seçin. Hazır imzalı HS-FS image varsa Studio doğrudan doğrular; "
-            "yalnız custom image gerektiğinde key seçimi/üretimi ve resmi TI signer akışına geçer."
+            "CCS projesini seçin; Studio kart durumuna göre MCU+ SDK ayarlarını belirleyip aynı make/signer "
+            "zincirini çalıştırır. .mcelf adını, certificate alanlarını veya DEVICE_TYPE değerini bilmeniz gerekmez."
         )
         intro.setWordWrap(True)
         intro.setObjectName("mutedText")
@@ -223,9 +225,13 @@ class ApplicationPage(QWidget):
         layout = QVBoxLayout(page)
         layout.addWidget(self._card(
             "1 · CCS / MCU+ SDK Build",
-            "Önerilen yol: CCS'te projeyi build edin ve proje/build klasörünü seçin. "
-            "Studio hazır imzalı HS-FS çıktısını yeniden imzalamaz; doğrudan doğrular."
+            "CCS proje veya build klasörünü seçin. Studio HS-FS için DEVICE_TYPE=GP, HS-SE için "
+            "DEVICE_TYPE=HS seçimini kendisi yapar; global devconfig.mak dosyasını değiştirmez."
         ))
+        self.lifecycle_status = QLabel()
+        self.lifecycle_status.setWordWrap(True)
+        self.lifecycle_status.setObjectName("statusInfo")
+        layout.addWidget(self.lifecycle_status)
 
         discovery = QFrame()
         discovery.setObjectName("infoCard")
@@ -242,7 +248,7 @@ class ApplicationPage(QWidget):
         discovery_text.addWidget(discovery_title)
         discovery_text.addWidget(discovery_note)
         discovery_layout.addLayout(discovery_text, 1)
-        discover_button = QPushButton("CCS Build Klasörünü Seç")
+        discover_button = QPushButton("CCS Proje / Build Klasörünü Seç")
         discover_button.setObjectName("primaryAction")
         discover_button.clicked.connect(self._choose_application_build_dir)
         discovery_layout.addWidget(discover_button)
@@ -261,18 +267,23 @@ class ApplicationPage(QWidget):
         self.ccs_verify_button.clicked.connect(self._verify_ready_ccs_image)
         self.ccs_unsigned_button = QPushButton("Kendi Key'imle Yeni Image Hazırla")
         self.ccs_unsigned_button.clicked.connect(self._select_unsigned_ccs_input)
+        self.ccs_build_button = QPushButton("Studio ile Secure Build Et")
+        self.ccs_build_button.setObjectName("primaryAction")
+        self.ccs_build_button.clicked.connect(lambda: self._run_ccs_secure_build(False))
         ccs_action_layout.addWidget(self.ccs_verify_button)
         ccs_action_layout.addWidget(self.ccs_unsigned_button)
+        ccs_action_layout.addWidget(self.ccs_build_button)
         ccs_action_layout.addStretch(1)
         self.ccs_actions.setVisible(False)
         layout.addWidget(self.ccs_actions)
 
         layout.addWidget(self._card(
             "Hangi durumda ne olacak?",
+            "HS-FS seçiliyse tek düğmeli build SDK'nin development key'iyle .appimage.hs_fs üretir. "
             "Hazır .appimage.hs_fs varsa certificate ve key seçmeden doğrulayın. "
             "Kendi development/test key'inizle yeni image gerekiyorsa Studio aynı build ağacındaki unsigned girdiyi seçer; "
             "bir sonraki adımda key'i seçebilir veya oluşturabilirsiniz ve application X.509 certificate TI signer tarafından "
-            "otomatik eklenir. HS-SE target kabulü için kullanılan key'in provision edilmiş customer Root of Trust ile eşleşmesi ayrıca gerekir."
+            "otomatik eklenir. HS-SE için kullanılan key'in provision edilmiş customer Root of Trust ile eşleşmesi gerekir."
         ))
 
         self.manual_input_card = QFrame()
@@ -342,8 +353,9 @@ class ApplicationPage(QWidget):
         try:
             scan = scan_ccs_application_build(directory)
             self._ccs_scan = scan
+            self._ccs_build_root = Path(directory).expanduser().resolve()
             self._ready_signed_input = None
-            self.ccs_actions.setVisible(False)
+            self.ccs_actions.setVisible(True)
 
             state = scan["state"]
             recommended = scan.get("recommended")
@@ -360,28 +372,38 @@ class ApplicationPage(QWidget):
                 )
                 self.ccs_verify_button.setVisible(True)
                 self.ccs_unsigned_button.setVisible(bool(scan["unsigned"]))
+                self.ccs_build_button.setVisible(True)
                 self.ccs_actions.setVisible(True)
             elif state == "UNSIGNED_READY" and recommended:
                 self.input.setText(recommended["path"])
                 self._set_discovery_status(
                     f"Unsigned build çıktısı bulundu ve seçildi: {recommended['name']}. "
-                    "Devam ederek mevcut veya yeni development/test key ile image hazırlayabilirsiniz.",
+                    "Studio ile Secure Build Et düğmesi lifecycle ayarını ve TI signer'ı otomatik çalıştırabilir.",
                     "statusWarn",
                 )
+                self.ccs_verify_button.setVisible(False)
+                self.ccs_unsigned_button.setVisible(True)
+                self.ccs_build_button.setVisible(True)
             elif state == "BUILD_INCOMPLETE":
                 self.input.clear()
                 self._set_discovery_status(
                     "Yalnız linker .out çıktısı bulundu. CCS Build Console'da MCU+ SDK boot-image/post-build "
-                    "aşamasını tamamlayın; bu aşamada certificate veya key seçmeniz gerekmez.",
+                    "aşaması tamamlanmamış. Studio ile Secure Build Et düğmesi aynı proje makefile'ını tamamlar.",
                     "statusWarn",
                 )
+                self.ccs_verify_button.setVisible(False)
+                self.ccs_unsigned_button.setVisible(False)
+                self.ccs_build_button.setVisible(True)
             else:
                 self.input.clear()
                 self._set_discovery_status(
-                    "Bu klasörde tanınan application çıktısı bulunamadı. Önce CCS'te projeyi build edin, "
-                    "ardından projenin build/output klasörünü seçin.",
-                    "statusFail",
+                    "Henüz application çıktısı bulunamadı. Makefile mevcutsa Studio projeyi lifecycle ve key "
+                    "ayarlarıyla build edebilir; .mcelf dosyasını sizin bulmanız gerekmez.",
+                    "statusWarn",
                 )
+                self.ccs_verify_button.setVisible(False)
+                self.ccs_unsigned_button.setVisible(False)
+                self.ccs_build_button.setVisible(True)
             self._update_navigation_state()
         except Exception as exc:
             show_guided_error(self, exc, context="CCS / MCU+ SDK build çıktısı taranamadı")
@@ -429,6 +451,52 @@ class ApplicationPage(QWidget):
             self._set_step(4)
         except Exception as exc:
             show_guided_error(self, exc, context="Hazır CCS secure application doğrulanamadı")
+
+    def _run_ccs_secure_build(self, use_selected_key: bool) -> None:
+        try:
+            if self._ccs_build_root is None:
+                raise FileNotFoundError("Önce CCS proje veya build klasörünü seçin")
+            lifecycle = self.state.lifecycle
+            signing_key = self.signing.text().strip() if use_selected_key else None
+            encryption_key = self.mek.text().strip() if use_selected_key and self.encrypt.isChecked() else None
+            if lifecycle == "HS-SE" and not signing_key:
+                self._set_discovery_status(
+                    "HS-SE için cihaza provision edilmiş Customer Root of Trust ile eşleşen signing key zorunludur. "
+                    "Key ve Koruma adımından mevcut key'i seçin.",
+                    "statusWarn",
+                )
+                self._set_step(1)
+                return
+            if use_selected_key:
+                self._validate_step(1)
+
+            env = self.state.environment or resolve_environment(self.sdk.text().strip() or None)
+            if self.sdk.text().strip():
+                env = resolve_environment(self.sdk.text().strip())
+            self.state.set_environment(env)
+            result = run_mcu_plus_secure_build(
+                self._ccs_build_root,
+                lifecycle=lifecycle,
+                sdk_root=env.sdk_root,
+                signing_key=signing_key or None,
+                encryption_key=encryption_key or None,
+            )
+            output = result.get("output")
+            if result.get("status") == "PASS" and isinstance(output, dict) and output.get("path"):
+                verification = inspect_and_verify(output["path"], verify=True).to_dict()
+                result["checks"].append({
+                    "check": "certificate_and_image_post_verify",
+                    "status": verification.get("status", "NOT_CHECKED"),
+                })
+                result["verification"] = verification
+                if verification.get("status") == "FAIL":
+                    result["status"] = "FAIL"
+                    result["summary"] = "Build tamamlandı ancak certificate/image doğrulaması başarısız oldu."
+            self.state.set_last_result(result)
+            self.result_view.set_result(result)
+            self._set_step(4)
+        except Exception as exc:
+            show_guided_error(self, exc, context="CCS / MCU+ SDK secure build tamamlanamadı")
 
     def _protection_step(self) -> QWidget:
         page = QWidget()
@@ -515,6 +583,22 @@ class ApplicationPage(QWidget):
         generate_mek.clicked.connect(self._generate_application_mek)
         mek_generate_layout.addWidget(generate_mek)
         layout.addWidget(self.mek_generate_help)
+
+        self.ccs_custom_build_card = QFrame()
+        self.ccs_custom_build_card.setObjectName("infoCard")
+        custom_build_layout = QHBoxLayout(self.ccs_custom_build_card)
+        custom_build_text = QLabel(
+            "Seçtiğiniz veya az önce ürettiğiniz key'i CCS/MCU+ SDK build'inde otomatik kullanın. "
+            "Application X.509 certificate TI signer tarafından build sırasında oluşturulur."
+        )
+        custom_build_text.setWordWrap(True)
+        custom_build_text.setObjectName("mutedText")
+        custom_build_layout.addWidget(custom_build_text, 1)
+        custom_build = QPushButton("Bu Key ile CCS Secure Build Et")
+        custom_build.setObjectName("primaryAction")
+        custom_build.clicked.connect(lambda: self._run_ccs_secure_build(True))
+        custom_build_layout.addWidget(custom_build)
+        layout.addWidget(self.ccs_custom_build_card)
 
         layout.addWidget(self._card(
             "Güvenlik sınırı",
@@ -663,6 +747,20 @@ class ApplicationPage(QWidget):
         self.sdk_expert_label.setVisible(expert)
         self.sdk_expert_box.setVisible(expert)
         self.manual_input_card.setVisible(expert)
+        lifecycle = self.state.lifecycle
+        if lifecycle == "HS-FS":
+            self.lifecycle_status.setText(
+                "Hedef: HS-FS · Studio MCU+ SDK için DEVICE_TYPE=GP kullanır. "
+                "Tek düğmeli build SDK development key'iyle çalışır; isterseniz kendi test key'inizi de seçebilirsiniz."
+            )
+        elif lifecycle == "HS-SE":
+            self.lifecycle_status.setText(
+                "Hedef: HS-SE · Studio DEVICE_TYPE=HS kullanır. Cihazdaki Customer Root of Trust ile eşleşen key zorunludur."
+            )
+        else:
+            self.lifecycle_status.setText(
+                "Hedef: GP · Studio DEVICE_TYPE=GP kullanır. Üretilen image secure enforcement kanıtı değildir."
+            )
 
     def _application_input_ready(self) -> bool:
         value = self.input.text().strip()

@@ -10,7 +10,7 @@ def test_ccs_application_is_the_primary_navigation_label():
     main = _source("gui/main_window.py")
     home = _source("gui/pages/home.py")
     assert '("application", "CCS / Secure Application"' in main
-    assert '("CCS / Secure Application", "CCS build çıktısını bulun' in home
+    assert '("CCS / Secure Application", "CCS projesini seçin; Studio lifecycle' in home
 
 
 def test_application_scan_prefers_existing_signed_output_and_can_verify_it():
@@ -23,6 +23,20 @@ def test_application_scan_prefers_existing_signed_output_and_can_verify_it():
         "inspect_and_verify(str(self._ready_signed_input), verify=True)",
         "Hangi durumda ne olacak?",
         "application X.509 certificate TI signer tarafından",
+    ]:
+        assert token in page
+
+
+def test_application_can_run_lifecycle_aware_mcu_plus_sdk_build():
+    page = _source("gui/pages/application.py")
+    for token in [
+        "run_mcu_plus_secure_build",
+        "Studio ile Secure Build Et",
+        "Bu Key ile CCS Secure Build Et",
+        'if lifecycle == "HS-SE" and not signing_key',
+        "certificate_and_image_post_verify",
+        "DEVICE_TYPE=GP",
+        "DEVICE_TYPE=HS",
     ]:
         assert token in page
 

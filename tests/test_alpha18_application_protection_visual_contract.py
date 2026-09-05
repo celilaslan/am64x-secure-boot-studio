@@ -42,9 +42,9 @@ def test_alpha18_mek_selector_is_conditional_and_existing_file_gated():
 
 def test_alpha18_inline_key_help_and_safety_copy_are_beginner_facing():
     text = _app()
-    assert 'Development/test key\'iniz yok mu?' in text
-    assert 'QPushButton("Test key set\'i oluştur")' in text
-    assert 'QPushButton("Key Center\'a Git")' not in text
+    assert 'Development/test key\'iniz yoksa' in text
+    assert 'QPushButton("Yeni Test Signing Key Oluştur ve Kullan")' in text
+    assert 'QPushButton("Bu Key ile CCS Secure Build Et")' in text
     assert 'Bu adım yalnız host üzerinde image hazırlamak içindir.' in text
     assert 'Studio OTP/eFuse yazmaz ve HS-FS → HS-SE geçişi yapmaz.' in text
 
