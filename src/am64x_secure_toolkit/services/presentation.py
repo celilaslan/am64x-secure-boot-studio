@@ -55,6 +55,21 @@ _CHECK_TITLES = {
     "decryption_random_string": "Decryption random-string check",
     "decrypted_original_prefix": "Decrypted original-data match",
     "decrypted_zero_padding": "Decrypted zero padding",
+    "physical_and_target_lifecycle_distinguished": "Kart durumu ve üretim hedefi",
+    "application_secure_build": "Secure application üretimi",
+    "application_certificate_and_image_verify": "Certificate ve image doğrulaması",
+    "selected_certificate_private_key_match": "Seçilen certificate ve private key eşleşmesi",
+    "output_certificate_identity_match": "CCS çıktısındaki certificate kimliği",
+    "boot_image_build": "SBL / combined boot image",
+    "global_devconfig_unchanged": "Global devconfig.mak değiştirilmedi",
+    "otp_efuse_untouched": "OTP/eFuse değiştirilmedi",
+    "mcu_plus_sdk_make": "CCS / MCU+ SDK build",
+    "ccs_bootimage_post_build": "CCS boot-image post-build",
+    "signed_output_discovery": "Signed application çıktısı",
+    "application_mcu_plus_sdk_make": "CCS / MCU+ SDK build",
+    "application_ccs_bootimage_post_build": "CCS boot-image post-build",
+    "application_signed_output_discovery": "Signed application çıktısı",
+    "application_global_devconfig_unchanged": "Application build devconfig kontrolü",
 }
 
 _OPERATION_TITLES = {
@@ -80,6 +95,10 @@ _OPERATION_TITLES = {
     "secure_debug_boardcfg_policy_evaluation": "Secure Debug Policy",
     "generic_data_verify": "Generic Data Verify",
     "generic_data_profile": "Generic Data Profile",
+    "secure_boot_package_build": "Secure Boot Paketi",
+    "ccs_secure_build": "CCS Secure Application",
+    "ccs_sbl_secure_build": "SBL / Combined Boot Image",
+    "uart_ospi_flash": "UART / OSPI Yükleme",
 }
 
 

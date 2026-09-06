@@ -36,6 +36,10 @@ class AppState(QObject):
         # It is transient: changing a packaging target must not rewrite project/device truth.
         self.build_target_lifecycle = self.lifecycle if self.lifecycle in {"HS-FS", "HS-SE"} else "HS-FS"
         self.customer_root_state = "unknown"
+        # Certificate Center can hand an identity to Secure Boot without writing
+        # private-key paths into project history or user preferences.
+        self.signing_certificate_path: str | None = None
+        self.signing_private_key_path: str | None = None
         self.mode = self.preferences.mode
         self.last_result: dict[str, Any] | None = None
         self.result_history: list[dict[str, Any]] = []
@@ -115,6 +119,24 @@ class AppState(QObject):
         if self.customer_root_state == root_state:
             return
         self.customer_root_state = root_state
+        self.changed.emit()
+
+    def set_signing_identity(
+        self,
+        *,
+        certificate_path: str | None,
+        private_key_path: str | None,
+    ) -> None:
+        """Keep the active signing identity in memory for this Studio session."""
+        certificate = certificate_path.strip() if certificate_path else None
+        private_key = private_key_path.strip() if private_key_path else None
+        if (
+            self.signing_certificate_path == certificate
+            and self.signing_private_key_path == private_key
+        ):
+            return
+        self.signing_certificate_path = certificate
+        self.signing_private_key_path = private_key
         self.changed.emit()
 
     def _save_preferences_best_effort(self) -> None:

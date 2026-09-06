@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.0-alpha32
+
+- Connected Certificate Center directly to the CCS Secure Boot workflow: a newly created application certificate and its matching private key are automatically selected for the current Studio session.
+- Added an explicit application-certificate selector to Secure Boot Package. Studio validates certificate/private-key DER-SPKI identity before invoking CCS and blocks mismatched pairs.
+- Custom signing keys are passed to the project's official MCU+ SDK recipe through the existing temporary secret stage; certificate bytes and private-key paths are not written into CCS project metadata, global `devconfig.mak`, preferences or reports.
+- After TI `appimage_x509_cert_gen.py` generates the payload-bound embedded X.509 certificate, Studio compares its public-key fingerprint with the selected Studio certificate and fails the package on mismatch.
+- Clarified in the GUI and documentation why a prebuilt application certificate cannot be copied byte-for-byte across builds: its integrity extension binds it to a specific payload; the reusable identity is the matching signing key pair.
+- Added Turkish result titles for the unified package/build/certificate identity checks.
+- Regression: 287 tests pass.
+
 ## 2.0.0-alpha31
 
 - Fixed a false verification failure against real MCU+ SDK output: TI's official `appimage_x509_cert_gen.py` encodes its default `destAddr` as the 4-byte OCTET STRING `00000000`, while Studio had required exactly 8 bytes.

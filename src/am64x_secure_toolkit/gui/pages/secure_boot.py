@@ -89,7 +89,9 @@ class SecureBootPage(QWidget):
         self.root_state.currentIndexChanged.connect(self._root_changed)
         self.scope.currentIndexChanged.connect(self._refresh_profile)
         self.encrypt.toggled.connect(self._refresh_profile)
+        self.certificate.textChanged.connect(self._identity_changed)
         self.signing.textChanged.connect(self._refresh_profile)
+        self.signing.textChanged.connect(self._identity_changed)
         self.mek.textChanged.connect(self._refresh_profile)
         self.state.changed.connect(self._sync_state)
         self._sync_state()
@@ -178,13 +180,17 @@ class SecureBootPage(QWidget):
 
     def _keys_card(self) -> QFrame:
         frame, layout = self._card(
-            "3 · Key ve koruma",
-            "HS-FS için SDK development key otomatik kullanılabilir. HS-SE için karttaki Customer RoT ile eşleşen private key zorunludur.",
+            "3 · Certificate kimliği, key ve koruma",
+            "Kendi certificate'ınızı seçtiğinizde Studio eşleşen private key'i CCS/TI signer'a verir ve çıkan embedded certificate kimliğini tekrar doğrular.",
         )
         form = QFormLayout()
+        self.certificate, certificate_row = self._path_row(
+            "Studio'da üretilen veya mevcut application certificate'ı seç", directory=False
+        )
         self.signing, signing_row = self._path_row("Application/SBL private signing key seç", directory=False)
         self.encrypt = QCheckBox("Application ve SBL şifrele")
         self.mek, mek_row = self._path_row("256-bit application/SBL MEK seç", directory=False)
+        form.addRow("Application certificate", certificate_row)
         form.addRow("Private signing key", signing_row)
         form.addRow("Koruma", self.encrypt)
         form.addRow("MEK", mek_row)
@@ -194,14 +200,20 @@ class SecureBootPage(QWidget):
         new_key.clicked.connect(self._generate_key)
         new_mek = QPushButton("Yeni development/test MEK oluştur")
         new_mek.clicked.connect(self._generate_mek)
+        certificate_center = QPushButton("Certificate Üret / Yönet")
+        certificate_center.clicked.connect(lambda: self.navigate.emit("certificate"))
         key_center = QPushButton("Gelişmiş Key Center")
         key_center.clicked.connect(lambda: self.navigate.emit("keys"))
+        actions.addWidget(certificate_center)
         actions.addWidget(new_key)
         actions.addWidget(new_mek)
         actions.addWidget(key_center)
         actions.addStretch(1)
         layout.addLayout(actions)
-        note = QLabel("Üretilen test key'leri production Customer RoT değildir; private key yolu proje/rapor geçmişine kaydedilmez.")
+        note = QLabel(
+            "Hazır certificate byte-for-byte CCS'e kopyalanmaz: TI signer güncel payload hash'iyle yeni certificate üretir. "
+            "Studio seçtiğiniz certificate'ın public key kimliğini korur. Seçimler yalnız bu Studio oturumunda tutulur; private key yolu rapora yazılmaz."
+        )
         note.setWordWrap(True)
         note.setObjectName("mutedText")
         layout.addWidget(note)
@@ -264,6 +276,24 @@ class SecureBootPage(QWidget):
         self._combo_set(self.physical, self.state.lifecycle)
         self._combo_set(self.target, getattr(self.state, "build_target_lifecycle", "HS-FS"))
         self._combo_set(self.root_state, getattr(self.state, "customer_root_state", "unknown"))
+        self._line_set(self.certificate, getattr(self.state, "signing_certificate_path", None))
+        self._line_set(self.signing, getattr(self.state, "signing_private_key_path", None))
+        self._refresh_profile()
+
+    @staticmethod
+    def _line_set(edit: QLineEdit, value: str | None) -> None:
+        text = value or ""
+        if edit.text() == text:
+            return
+        edit.blockSignals(True)
+        edit.setText(text)
+        edit.blockSignals(False)
+
+    def _identity_changed(self) -> None:
+        self.state.set_signing_identity(
+            certificate_path=self.certificate.text(),
+            private_key_path=self.signing.text(),
+        )
         self._refresh_profile()
 
     def _target_changed(self) -> None:
@@ -301,6 +331,10 @@ class SecureBootPage(QWidget):
             + ("SDK development key kullanılabilir." if profile.sdk_development_key_allowed else "Customer signing key zorunlu.")
         )
         messages = [*profile.blockers, *profile.warnings]
+        if self.certificate.text().strip() and self.signing.text().strip():
+            details += " Studio certificate kimliği seçildi; build öncesi key, build sonrası embedded certificate eşleşmesi denetlenecek."
+        elif self.certificate.text().strip():
+            messages.append("Certificate seçildi; CCS build için ona ait private signing key de seçilmelidir.")
         self.profile_status.setText(details + ("\n" + "\n".join(f"• {x}" for x in messages) if messages else "\n✓ Build ve yükleme hedefleri tutarlı."))
         self.profile_status.setObjectName("statusWarn" if messages else "statusPass")
         self.profile_status.style().unpolish(self.profile_status)
@@ -320,6 +354,8 @@ class SecureBootPage(QWidget):
             return
         try:
             result = generate_signing_key(directory, role="application")
+            # A newly generated key cannot represent an already selected certificate.
+            self.certificate.clear()
             self.signing.setText(str(Path(directory).resolve() / result["secret_files_created"][0]))
             self.state.set_last_result(result)
         except Exception as exc:
@@ -362,6 +398,7 @@ class SecureBootPage(QWidget):
                 physical_lifecycle=str(self.physical.currentData()),
                 target_lifecycle=str(self.target.currentData()),
                 customer_root_state=str(self.root_state.currentData()),
+                reference_certificate=self.certificate.text().strip() or None,
                 signing_key=self.signing.text().strip() or None,
                 encryption_key=self.mek.text().strip() if self.encrypt.isChecked() else None,
                 encrypt=self.encrypt.isChecked(),

@@ -462,7 +462,11 @@ class CertificatePage(QWidget):
         validate_btn = QPushButton("Formu Doğrula"); validate_btn.clicked.connect(self.validate_create_form)
         profile_btn = QPushButton("Profile Kaydet"); profile_btn.clicked.connect(self.save_create_profile)
         build_btn = QPushButton("Certificate Oluştur + Doğrula"); build_btn.setObjectName("primaryAction"); build_btn.clicked.connect(self.build_create_certificate)
+        self.create_secure_boot_btn = QPushButton("Secure Boot'ta Kullan")
+        self.create_secure_boot_btn.setEnabled(False)
+        self.create_secure_boot_btn.clicked.connect(lambda: self.navigate.emit("secure_boot"))
         action_row.addWidget(validate_btn); action_row.addWidget(profile_btn); action_row.addStretch(1); action_row.addWidget(build_btn)
+        action_row.addWidget(self.create_secure_boot_btn)
         rl.addLayout(action_row)
         self.create_result = HumanResultView(show_boundary=False)
         rl.addWidget(self.create_result, 1)
@@ -938,6 +942,24 @@ class CertificatePage(QWidget):
                 },
                 "outputs": outputs,
             })
+            if str(self.create_kind.currentData()) == "application":
+                identity_match = compare_certificate_with_private_key(
+                    self.create_der.text(), self.create_key.text()
+                )
+                if identity_match.get("status") != "PASS":
+                    raise ValueError("Üretilen application certificate ile signing private key eşleşmedi")
+                self.state.set_signing_identity(
+                    certificate_path=self.create_der.text(),
+                    private_key_path=self.create_key.text(),
+                )
+                result["secure_boot_handoff"] = {
+                    "status": "PASS",
+                    "certificate_name": Path(self.create_der.text()).name,
+                    "spki_sha256": metadata["spki_sha256"],
+                    "note": "Certificate kimliği ve eşleşen private key bu Studio oturumundaki Secure Boot akışına aktarıldı.",
+                }
+                result["summary"] += " Certificate kimliği Secure Boot akışına seçildi."
+                self.create_secure_boot_btn.setEnabled(True)
             published = self._publish(result, "certificate_profile")
             self.create_result.set_result(published)
         except Exception as exc:

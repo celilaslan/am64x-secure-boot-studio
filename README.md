@@ -1,12 +1,12 @@
 # AM64x Secure Boot Studio / Toolkit
 
-**Current development release: `2.0.0-alpha31`**
+**Current development release: `2.0.0-alpha32`**
 
 Alpha21 introduces the AM64x-focused **Certificate Center** for from-scratch Subject entry, Application/Secure Debug certificate creation, inspect/verify/export/reissue/compare and public Project Certificate Library workflows.
 
 AM64x/AM6442 Secure Boot çalışmalarında kullanılan image, X.509 certificate, key ve SDK yapılandırmalarını hazırlamak, incelemek ve doğrulamak için geliştirilmiş Python araç seti ve rehberli masaüstü uygulamasıdır. Toolkit, Texas Instruments MCU+ SDK içindeki `rom_image_gen.py` ve `appimage_x509_cert_gen.py` araçlarının yerine geçmez; bu araçlarla yürütülen işlemlerin çevresine ek kontrol ve doğrulama katmanı sağlar.
 
-Current Studio development build: `2.0.0-alpha31` (real Windows/board validation in progress; final release not declared).
+Current Studio development build: `2.0.0-alpha32` (real Windows/board validation in progress; final release not declared).
 
 Araç seti şu teknik sürümler esas alınarak geliştirilmiştir:
 
@@ -143,6 +143,17 @@ Windows kaynak checkout'unda venv aktive etmeden çalıştırmak için yalnız �
 5. Paketi üretin. Studio `.mcelf`, `DEVICE_TYPE` ve certificate alanlarını proje tarifinden yönetir.
 6. Karta yazmadan önce UART boot modunu seçin ve yükleme planını kontrol edin. Studio lifecycle'a uygun TI config'inden boot/application offset'lerini okur.
 7. Yazma tamamlandıktan sonra kartı OSPI boot moduna alın, resetleyin ve UART logunu gözleyin. CCS Debug/Run veya yalnız UniFlash exit `0`, gerçek secure boot kanıtı sayılmaz.
+
+## Studio'da üretilen certificate'ı CCS build'de kullanma
+
+1. **Certificate Center → Yeni Certificate** ile application certificate ve RSA-4096 private signing key'inizi hazırlayın.
+2. Certificate üretildiğinde Studio certificate kimliğini ve eşleşen private key'i aynı oturumdaki **Secure Boot Paketi** ekranına otomatik aktarır. İsterseniz bu ekranda mevcut certificate/key çiftini de seçebilirsiniz.
+3. Studio build öncesinde certificate ile private key'in DER-SPKI public-key kimliğini karşılaştırır. Eşleşmeyen çiftle CCS çalıştırılmaz.
+4. CCS/MCU+ SDK post-build tarifine `APP_SIGNING_KEY` geçici secret stage üzerinden verilir. Global `devconfig.mak` ve CCS project metadata'sı değiştirilmez.
+5. TI `appimage_x509_cert_gen.py`, güncel `.mcelf` payload hash'i ve TI extension alanlarıyla yeni X.509 certificate üretip `.mcelf.hs_fs` veya `.mcelf.hs` dosyasına gömer.
+6. Studio çıktıdaki embedded certificate'ın public-key parmak izini seçilen Studio certificate ile tekrar karşılaştırır; eşleşme yoksa paketi başarısız sayar.
+
+Hazır certificate dosyasının byte'ları doğrudan CCS'e verilmez; çünkü certificate payload hash'ini taşır ve her yeni build için payload'a göre yeniden üretilmesi gerekir. Korunan şey sizin signing kimliğinizdir: aynı private/public key çifti kullanılır ve build sonunda doğrulanır. Private key yolu tercihlere veya proje raporuna kaydedilmez.
 
 Synthetic development key set üretmek için:
 
