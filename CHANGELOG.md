@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0-alpha30
+
+- Added zero-click SDK discovery for standard Windows TI installs such as `C:\\ti\\mcu_plus_sdk_am64x_*`, plus Linux `/opt/ti`, `/ti`, user `ti` directory and TI/Studio environment-variable locations.
+- The last successfully resolved SDK root is stored only in local preferences and reused automatically on later Studio launches and after source updates.
+- Environment and Secure Boot Package pages can use the startup-discovered SDK without asking the user to browse for it again.
+- Regression: 283 tests pass; automatic environment override and preference round-trip are covered.
+
 ## 2.0.0-alpha29
 
 - Fixed real Windows CCS/MCU+ SDK 12 output discovery: signed application outputs named `<name>.mcelf.hs_fs` and `<name>.mcelf.hs` are now recognized alongside `.appimage.hs_fs` and `.appimage.hs`.

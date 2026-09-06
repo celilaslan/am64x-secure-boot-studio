@@ -157,6 +157,17 @@ class EnvironmentPage(QWidget):
         self.tabs.addTab(technical, "Teknik Ayrıntılar")
         self.tabs.setCurrentIndex(0)
 
+        if self.state.environment and self.state.environment.sdk_root:
+            env = self.state.environment
+            self.sdk.setText(str(env.sdk_root))
+            self.discovered_sdk.setText(f"Otomatik/hatırlanan SDK: {env.sdk_root}")
+            self.discovered_sdk.setVisible(True)
+            self.summary.setText(
+                f"SDK otomatik bulundu: {env.sdk_version or env.sdk_root.name}. "
+                "Yolu yeniden seçmeniz gerekmez; isterseniz kontrolleri yenileyebilirsiniz."
+            )
+            self.summary.setObjectName("statusPass" if env.ready else "statusWarn")
+
     def _result_card(self, title: str) -> tuple[QFrame, QLabel, QLabel, QLabel]:
         frame = QFrame()
         frame.setObjectName("statusCard")

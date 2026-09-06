@@ -43,6 +43,7 @@ class UserPreferences:
     device: str = "AM6442"
     silicon_revision: str = "SR2.0"
     lifecycle: str = "HS-FS"
+    sdk_root: str | None = None
     first_run_complete: bool = False
     recent_projects: tuple[str, ...] = ()
 
@@ -53,6 +54,7 @@ class UserPreferences:
             "device": self.device,
             "silicon_revision": self.silicon_revision,
             "lifecycle": self.lifecycle,
+            "sdk_root": self.sdk_root,
             "first_run_complete": self.first_run_complete,
             "recent_projects": list(self.recent_projects),
             "local_only": True,
@@ -81,6 +83,7 @@ def _validated(data: dict[str, Any] | None) -> UserPreferences:
         device=str(data.get("device") or "AM6442"),
         silicon_revision=str(data.get("silicon_revision") or "SR2.0"),
         lifecycle=lifecycle if lifecycle in _ALLOWED_LIFECYCLES else "HS-FS",
+        sdk_root=(str(data.get("sdk_root")) if isinstance(data.get("sdk_root"), str) and data.get("sdk_root").strip() else None),
         first_run_complete=bool(data.get("first_run_complete", False)),
         recent_projects=tuple(recent),
     )
@@ -135,6 +138,12 @@ def with_context(pref: UserPreferences, *, device: str, silicon_revision: str, l
     if lifecycle not in _ALLOWED_LIFECYCLES:
         raise ValueError("lifecycle GP, HS-FS veya HS-SE olmalı")
     return replace(pref, device=device, silicon_revision=silicon_revision, lifecycle=lifecycle)
+
+
+def with_sdk_root(pref: UserPreferences, sdk_root: str | Path | None) -> UserPreferences:
+    """Remember a non-secret SDK location in local-only preferences."""
+    value = str(Path(sdk_root).expanduser().resolve()) if sdk_root else None
+    return replace(pref, sdk_root=value)
 
 
 def with_recent_project(pref: UserPreferences, project_root: str | Path) -> UserPreferences:

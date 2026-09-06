@@ -4,14 +4,14 @@ from typing import Any
 
 from PySide6.QtCore import QObject, Signal
 
-from ..services.environment import EnvironmentResolution
+from ..services.environment import EnvironmentResolution, resolve_environment
 from ..services.project import (
     ProjectContext, read_project_artifacts, read_project_events,
     record_project_artifacts, record_project_event,
 )
 from ..services.secret_policy import sanitize_for_record
 from ..services.preferences import (
-    UserPreferences, load_preferences, save_preferences, with_context, with_mode, with_recent_project,
+    UserPreferences, load_preferences, save_preferences, with_context, with_mode, with_recent_project, with_sdk_root,
 )
 
 
@@ -42,6 +42,14 @@ class AppState(QObject):
         self.project_history: list[dict[str, Any]] = []
         self.project_artifacts: list[dict[str, Any]] = []
         self.project_history_error: str | None = None
+        # Resolve the remembered SDK (or standard local TI installation) at startup.
+        # Failure is non-fatal; SDK-independent inspection tools remain available.
+        try:
+            discovered = resolve_environment(self.preferences.sdk_root)
+            if discovered.sdk_root is not None:
+                self.environment = discovered
+        except Exception:
+            pass
 
     def set_mode(self, mode: str) -> None:
         if mode not in {"guided", "expert"}:
@@ -56,6 +64,9 @@ class AppState(QObject):
 
     def set_environment(self, env: EnvironmentResolution) -> None:
         self.environment = env
+        if env.sdk_root is not None:
+            self.preferences = with_sdk_root(self.preferences, env.sdk_root)
+            self._save_preferences_best_effort()
         self.changed.emit()
 
     def set_project(self, project: ProjectContext) -> None:

@@ -11,7 +11,7 @@ from am64x_secure_toolkit.services.beta_readiness import beta_readiness
 from am64x_secure_toolkit.services.diagnostics import diagnostics_markdown, diagnostics_snapshot, write_diagnostics
 from am64x_secure_toolkit.services.environment import resolve_environment
 from am64x_secure_toolkit.services.preferences import (
-    UserPreferences, load_preferences, save_preferences, with_context, with_mode, with_recent_project,
+    UserPreferences, load_preferences, save_preferences, with_context, with_mode, with_recent_project, with_sdk_root,
 )
 from am64x_secure_toolkit.services.project import create_project
 from am64x_secure_toolkit.services.ui_contract import page_visible
@@ -25,10 +25,12 @@ def test_preferences_round_trip_is_local_only_and_restrictive(tmp_path: Path, mo
     pref = with_mode(pref, "expert")
     pref = with_context(pref, device="AM6442", silicon_revision="SR2.0", lifecycle="HS-FS")
     pref = with_recent_project(pref, project)
+    pref = with_sdk_root(pref, tmp_path / "ti" / "mcu_plus_sdk_am64x_12_00_00_27")
     path = save_preferences(pref)
     loaded = load_preferences()
     assert loaded.mode == "expert"
     assert loaded.recent_projects[0] == str(project.resolve())
+    assert loaded.sdk_root == str((tmp_path / "ti" / "mcu_plus_sdk_am64x_12_00_00_27").resolve())
     payload = json.loads(path.read_text(encoding="utf-8"))
     assert payload["local_only"] is True
     assert payload["secret_values_stored"] is False

@@ -53,13 +53,21 @@ def _candidate_roots(explicit: str | Path | None) -> list[Path]:
     raw: list[Path] = []
     if explicit is not None:
         raw.append(Path(explicit).expanduser())
-    for env_name in ("MCU_PLUS_SDK_PATH", "SDK_INSTALL_PATH"):
+    # Studio-specific override and TI build variables are checked before common
+    # installation locations. No drive-wide recursive scan is performed.
+    for env_name in ("AM64X_STUDIO_SDK_ROOT", "MCU_PLUS_SDK_PATH", "SDK_INSTALL_PATH"):
         value = os.environ.get(env_name)
         if value:
             raw.append(Path(value).expanduser())
-    ti_home = Path.home() / "ti"
-    if ti_home.is_dir():
-        raw.extend(sorted(ti_home.glob("mcu_plus_sdk_am64x_*"), reverse=True))
+    ti_homes = [Path.home() / "ti"]
+    if os.name == "nt":
+        system_drive = os.environ.get("SystemDrive") or "C:"
+        ti_homes.extend([Path(f"{system_drive}\\ti"), Path("C:/ti")])
+    else:
+        ti_homes.extend([Path("/opt/ti"), Path("/ti")])
+    for ti_home in ti_homes:
+        if ti_home.is_dir():
+            raw.extend(sorted(ti_home.glob("mcu_plus_sdk_am64x_*"), reverse=True))
     seen: set[str] = set()
     result: list[Path] = []
     for item in raw:
