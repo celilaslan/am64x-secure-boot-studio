@@ -32,6 +32,10 @@ class AppState(QObject):
         self.device = self.preferences.device
         self.silicon_revision = self.preferences.silicon_revision
         self.lifecycle = self.preferences.lifecycle
+        # Build target is deliberately separate from the physical board lifecycle.
+        # It is transient: changing a packaging target must not rewrite project/device truth.
+        self.build_target_lifecycle = self.lifecycle if self.lifecycle in {"HS-FS", "HS-SE"} else "HS-FS"
+        self.customer_root_state = "unknown"
         self.mode = self.preferences.mode
         self.last_result: dict[str, Any] | None = None
         self.result_history: list[dict[str, Any]] = []
@@ -59,6 +63,7 @@ class AppState(QObject):
         self.device = project.device
         self.silicon_revision = project.silicon_revision
         self.lifecycle = project.lifecycle
+        self.build_target_lifecycle = self.lifecycle if self.lifecycle in {"HS-FS", "HS-SE"} else "HS-FS"
         self.preferences = with_context(
             self.preferences, device=self.device, silicon_revision=self.silicon_revision, lifecycle=self.lifecycle
         )
@@ -83,6 +88,22 @@ class AppState(QObject):
             self.preferences, device=device, silicon_revision=silicon_revision, lifecycle=lifecycle
         )
         self._save_preferences_best_effort()
+        self.changed.emit()
+
+    def set_build_target_lifecycle(self, lifecycle: str) -> None:
+        if lifecycle not in {"HS-FS", "HS-SE"}:
+            raise ValueError("üretim hedefi yalnız HS-FS veya HS-SE olabilir")
+        if self.build_target_lifecycle == lifecycle:
+            return
+        self.build_target_lifecycle = lifecycle
+        self.changed.emit()
+
+    def set_customer_root_state(self, root_state: str) -> None:
+        if root_state not in {"unknown", "not_provisioned", "provisioned", "hardware_verified"}:
+            raise ValueError("geçersiz Customer Root of Trust durumu")
+        if self.customer_root_state == root_state:
+            return
+        self.customer_root_state = root_state
         self.changed.emit()
 
     def _save_preferences_best_effort(self) -> None:

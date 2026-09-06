@@ -456,7 +456,7 @@ class ApplicationPage(QWidget):
         try:
             if self._ccs_build_root is None:
                 raise FileNotFoundError("Önce CCS proje veya build klasörünü seçin")
-            lifecycle = self.state.lifecycle
+            lifecycle = getattr(self.state, "build_target_lifecycle", self.state.lifecycle)
             signing_key = self.signing.text().strip() if use_selected_key else None
             encryption_key = self.mek.text().strip() if use_selected_key and self.encrypt.isChecked() else None
             if lifecycle == "HS-SE" and not signing_key:
@@ -747,7 +747,7 @@ class ApplicationPage(QWidget):
         self.sdk_expert_label.setVisible(expert)
         self.sdk_expert_box.setVisible(expert)
         self.manual_input_card.setVisible(expert)
-        lifecycle = self.state.lifecycle
+        lifecycle = getattr(self.state, "build_target_lifecycle", self.state.lifecycle)
         if lifecycle == "HS-FS":
             self.lifecycle_status.setText(
                 "Hedef: HS-FS · Studio MCU+ SDK için DEVICE_TYPE=GP kullanır. "

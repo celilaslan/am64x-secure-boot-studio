@@ -107,8 +107,19 @@ class DeviceContextBar(QFrame):
 
     def refresh(self) -> None:
         sdk = self.state.environment.sdk_version if self.state.environment else None
-        self.context_chip.setText(f"{self.state.device} · {self.state.silicon_revision} · {self.state.lifecycle}")
+        target = getattr(self.state, "build_target_lifecycle", self.state.lifecycle)
+        self.context_chip.setText(
+            f"{self.state.device} · {self.state.silicon_revision} · Kart: {self.state.lifecycle} · Hedef: {target}"
+        )
         self.sdk_chip.setText(f"SDK {sdk}" if sdk else "SDK not checked")
+        root_state = getattr(self.state, "customer_root_state", "unknown")
+        root_labels = {
+            "unknown": "Customer RoT: Doğrulanmadı",
+            "not_provisioned": "Customer RoT: Provision edilmedi",
+            "provisioned": "Customer RoT: Provision edildi (kullanıcı beyanı)",
+            "hardware_verified": "Customer RoT: Donanımda doğrulandı (kullanıcı beyanı)",
+        }
+        self.root_chip.setText(root_labels.get(root_state, "Customer RoT: Doğrulanmadı"))
 
 
 class StatusBadge(QLabel):

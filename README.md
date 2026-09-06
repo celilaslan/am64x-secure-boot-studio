@@ -1,12 +1,12 @@
 # AM64x Secure Boot Studio / Toolkit
 
-**Current development release: `2.0.0-alpha27`**
+**Current development release: `2.0.0-alpha28`**
 
 Alpha21 introduces the AM64x-focused **Certificate Center** for from-scratch Subject entry, Application/Secure Debug certificate creation, inspect/verify/export/reissue/compare and public Project Certificate Library workflows.
 
 AM64x/AM6442 Secure Boot çalışmalarında kullanılan image, X.509 certificate, key ve SDK yapılandırmalarını hazırlamak, incelemek ve doğrulamak için geliştirilmiş Python araç seti ve rehberli masaüstü uygulamasıdır. Toolkit, Texas Instruments MCU+ SDK içindeki `rom_image_gen.py` ve `appimage_x509_cert_gen.py` araçlarının yerine geçmez; bu araçlarla yürütülen işlemlerin çevresine ek kontrol ve doğrulama katmanı sağlar.
 
-Current Studio development build: `2.0.0-alpha27` (real-host visual QA in progress; final release not declared).
+Current Studio development build: `2.0.0-alpha28` (real Windows/board validation in progress; final release not declared).
 
 Araç seti şu teknik sürümler esas alınarak geliştirilmiştir:
 
@@ -17,6 +17,8 @@ Araç seti şu teknik sürümler esas alınarak geliştirilmiştir:
 
 ## Başlıca özellikler
 
+- Tek ekranlı **Secure Boot Paketi** akışı: fiziksel kart lifecycle'ı, HS-FS/HS-SE üretim hedefi, CCS application, optional SBL/combined boot image, key, UART/OSPI yükleme ve gerçek boot kontrolü
+- Lifecycle güvenlik kapısı: build hedefi kart durumundan ayrı tutulur; eşleşmeyen veya Customer RoT durumu doğrulanmayan paket karta yazılamaz
 - Secure image ve DER X.509 certificate inceleme
 - Certificate signature ile payload/ciphertext integrity kontrollerini ayrı doğrulama
 - Application ve ROM image üretiminde kurulu TI SDK araçlarını kontrollü çağırma
@@ -123,6 +125,24 @@ securestudio
 # veya
 securectl gui
 ```
+
+Windows kaynak checkout'unda venv aktive etmeden çalıştırmak için yalnız şunu kullanın:
+
+```powershell
+.\studio.cmd
+```
+
+`studio.cmd` ilk kullanımda `.venv` ve GUI bağımlılıklarını hazırlar. Kurulum editable olduğu için sonraki `git pull` işlemlerinden sonra tekrar kurulum veya venv aktivasyonu gerekmez.
+
+## CCS'den karta giden kısa yol
+
+1. Studio'da Environment kontrolünü bir kez tamamlayın.
+2. **Secure Boot Paketi** ekranında fiziksel kart durumunu ve üretim hedefini ayrı seçin.
+3. Application CCS projesini seçin. Kendi SBL'inizi de üretmek istiyorsanız “Tam paket” seçip SBL CCS projesini ekleyin.
+4. HS-FS development için SDK key'i kullanılabilir. HS-SE için provision edilmiş Customer RoT ile eşleşen private key gerekir.
+5. Paketi üretin. Studio `.mcelf`, `DEVICE_TYPE` ve certificate alanlarını proje tarifinden yönetir.
+6. Karta yazmadan önce UART boot modunu seçin ve yükleme planını kontrol edin. Studio lifecycle'a uygun TI config'inden boot/application offset'lerini okur.
+7. Yazma tamamlandıktan sonra kartı OSPI boot moduna alın, resetleyin ve UART logunu gözleyin. CCS Debug/Run veya yalnız UniFlash exit `0`, gerçek secure boot kanıtı sayılmaz.
 
 Synthetic development key set üretmek için:
 

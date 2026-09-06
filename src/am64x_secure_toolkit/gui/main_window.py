@@ -27,6 +27,7 @@ from .pages.revision import RevisionPage
 from .pages.rom import RomPage
 from .pages.sdk import SdkPage
 from .pages.secure_debug import SecureDebugPage
+from .pages.secure_boot import SecureBootPage
 from .state import AppState
 from .widgets import DeviceContextBar
 
@@ -36,7 +37,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("AM64x Secure Boot Studio")
         self.resize(1320, 860)
-        self.setMinimumSize(1024, 700)
+        # Legacy visual contract was setMinimumSize(1024, 700); guided pages are now scrollable.
+        self.setMinimumSize(900, 620)
         self.setAccessibleName("AM64x Secure Boot Studio ana penceresi")
         self.state = AppState()
         self.statusBar().showMessage("Hazır · host-side / offline")
@@ -72,6 +74,7 @@ class MainWindow(QMainWindow):
             ("guide", "Bana Yol Göster", GuidePage(self.state)),
             ("environment", "Environment", EnvironmentPage(self.state)),
             ("project", "Proje", ProjectPage(self.state)),
+            ("secure_boot", "Secure Boot Paketi", SecureBootPage(self.state)),
             ("application", "CCS / Secure Application", ApplicationPage(self.state)),
             ("rom", "ROM Image", RomPage(self.state)),
             ("inspector", "Image İnceleme", InspectorPage(self.state)),
@@ -119,6 +122,7 @@ class MainWindow(QMainWindow):
             "Ctrl+1": "home",
             "Ctrl+2": "guide",
             "Ctrl+E": "environment",
+            "Ctrl+B": "secure_boot",
             "Ctrl+I": "inspector",
             "Ctrl+K": "keys",
             "Ctrl+R": "reports",

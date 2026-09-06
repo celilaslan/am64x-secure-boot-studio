@@ -2,6 +2,22 @@
 
 Toolkit, MCU+ SDK 12.00.00.27 içindeki signing araçlarını değiştirmeden çağırır.
 
+## Rehberli CCS / Secure Boot Paketi
+
+Normal kullanımda manuel `securectl build` parametreleri yerine Studio'daki **Secure Boot Paketi** ekranı kullanılır. Bu ekran:
+
+- fiziksel kart lifecycle'ını üretim hedefinden ayırır;
+- HS-FS için `DEVICE_TYPE=GP`, HS-SE için `DEVICE_TYPE=HS` seçer;
+- CCS application projesinin ve isteğe bağlı SBL projesinin kendi make/post-build tarifini çalıştırır;
+- application ve boot image çıktılarını lifecycle suffix'ine göre ayırır;
+- SDK'nın `default_sbl_ospi_hs_fs.cfg` veya `default_sbl_ospi_hs.cfg` dosyasındaki flash offset'lerini okuyarak UART UniFlash planı kurar.
+
+Global `devconfig.mak` veya CCS project metadata'sı değiştirilmez. Private key/MEK yalnız geçici stage üzerinden make işlemine verilir ve yolu kalıcı rapora yazılmaz.
+
+HS-SE artifact HS-FS makinede çevrimdışı hazırlanabilir; bu durum karta deploy edilebilirlik anlamına gelmez. Studio fiziksel lifecycle ile hedef eşleşmedikçe veya HS-SE Customer RoT durumu doğrulanmadıkça flash çalıştırmaz.
+
+OSPI yazma OTP/eFuse yazma değildir, ancak mevcut flash içeriğini değiştirir ve bu nedenle iki aşamalı kullanıcı onayı ister. UniFlash exit `0`, ROM/TIFS authentication sonucunu tek başına kanıtlamaz; kart OSPI boot modunda resetlenip UART çıktısı gözlenmelidir.
+
 ## Application image
 
 ```bash

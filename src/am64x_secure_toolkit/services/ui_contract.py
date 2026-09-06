@@ -7,12 +7,12 @@ accepted semantic values. Labels may be Turkish/readable while values stay canon
 """
 
 GUIDED_PAGE_KEYS: tuple[str, ...] = (
-    "home", "guide", "environment", "project", "application", "inspector", "certificate",
+    "home", "guide", "environment", "project", "secure_boot", "application", "inspector", "certificate",
     "keys", "negative", "reports", "learn", "demo", "diagnostics",
 )
 
 EXPERT_PAGE_KEYS: tuple[str, ...] = (
-    "home", "guide", "environment", "project", "application", "rom", "inspector",
+    "home", "guide", "environment", "project", "secure_boot", "application", "rom", "inspector",
     "certificate", "keys", "negative", "sdk", "errata", "provisioning", "revision",
     "boardcfg", "secure_debug", "generic_data", "reports", "source_trace", "learn", "demo", "diagnostics",
 )

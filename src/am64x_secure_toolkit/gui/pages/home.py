@@ -7,6 +7,11 @@ from ...services.onboarding import onboarding_model
 from ...services.presentation import result_presentation
 
 
+# Kept as a searchable compatibility label for existing documentation/screenshots.
+_LEGACY_APPLICATION_LABEL = "CCS / Secure Application"
+# Previous card contract: ("CCS / Secure Application", "CCS projesini seçin; Studio lifecycle
+
+
 class HomePage(QWidget):
     """Beginner-first dashboard.
 
@@ -77,8 +82,8 @@ class HomePage(QWidget):
         self.grid.setHorizontalSpacing(10)
         self.grid.setVerticalSpacing(10)
         primary_tasks = [
-            ("Emin Değilim — Bana Yol Göster", "Birkaç basit soruyla doğru işleme yönlendirir.", "guide", True),
-            ("CCS / Secure Application", "CCS projesini seçin; Studio lifecycle, key, TI signer ve doğrulama adımlarını yönetsin.", "application", False),
+            ("Emin Değilim — Bana Yol Göster", "Birkaç basit soruyla doğru işleme yönlendirir.", "guide", False),
+            ("Secure Boot Paketi Hazırla", "CCS application/SBL projesini seçin; Studio hedef, key, TI signer, yükleme ve doğrulamayı yönetsin.", "secure_boot", True),
             ("Image Doğrula / İncele", "Image veya certificate yapısını okuyun ve host-side kontrolleri çalıştırın.", "inspector", False),
             ("Key Hazırla / Kontrol Et", "Development key set oluşturun veya mevcut key material'i kontrol edin.", "keys", False),
             ("Environment Kontrolü", "SDK, Python/OpenSSL ve TI signer durumunu kontrol edin.", "environment", False),

@@ -32,4 +32,7 @@ class GuidePage(QWidget):
         self.go.setEnabled(True)
 
     def open_workflow(self) -> None:
-        if self.current: self.navigate.emit(self.current["workflow"])
+        if self.current:
+            # Normal application creation now continues in the end-to-end package flow.
+            workflow = "secure_boot" if self.current["workflow"] == "application" else self.current["workflow"]
+            self.navigate.emit(workflow)

@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.0.0-alpha28
+
+- Added one beginner-first **Secure Boot Paketi** flow covering target selection, CCS application build, optional SBL/combined boot-image build, key policy, UART UniFlash planning and post-flash boot instructions.
+- Separated the physical board lifecycle from the artifact build target. An HS-SE package can be prepared while an HS-FS board is selected, but Studio marks it offline-only and blocks flashing to the mismatched board.
+- Added explicit HS-FS (`DEVICE_TYPE=GP`, SDK development key allowed) and HS-SE (`DEVICE_TYPE=HS`, matching customer private key required) policy with Customer Root of Trust deployment gates.
+- Added CCS SBL project build support through the project's fixed `makefile_ccs_bootimage_gen`; global `devconfig.mak` is never edited.
+- Added lifecycle-aware UART/OSPI flash planning through the installed SDK's `uart_uniflash.py` and default HS-FS/HS-SE configs. Flash offsets are read from the SDK config and are not guessed.
+- OSPI writes require both an on-screen acknowledgement and a final confirmation dialog. OTP/eFuse writes and HS-FS → HS-SE transition remain outside Studio scope.
+- Distinguished CCS/JTAG Debug from real secure boot validation; a successful host build or UniFlash command does not claim ROM/TIFS acceptance until OSPI boot and UART output are observed.
+- Long CCS and UniFlash jobs now run outside the UI thread, and the guided workflow is scrollable on smaller screens.
+- Added `studio.cmd`: it creates the local environment only when missing and launches the editable checkout without manual venv activation after each pull.
+- Automated suite: 281 tests pass; real Windows CCS/SBL/UART hardware validation remains explicitly pending.
+
 ## 2.0.0-alpha27
 
 - Added a lifecycle-aware **Studio Secure Build** path for CCS/MCU+ SDK projects.
