@@ -80,7 +80,7 @@ def test_missing_signed_output_runs_fixed_name_ccs_bootimage_recipe(
     def fake_run(command, **_kwargs):
         calls.append(command)
         if "-f" in command:
-            (build / "hello_world.appimage.hs_fs").write_bytes(b"signed")
+            (build / "hello_world.mcelf.hs_fs").write_bytes(b"signed")
             return SimpleNamespace(returncode=0, stdout="post-build ok", stderr="")
         return SimpleNamespace(returncode=0, stdout="link ok", stderr="")
 

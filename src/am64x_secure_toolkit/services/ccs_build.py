@@ -19,9 +19,14 @@ _SKIP_DIRS = {
 def classify_application_artifact(path: str | Path) -> str | None:
     """Classify common MCU+ SDK application build outputs by filename only."""
     name = Path(path).name.casefold()
-    if name.endswith(".appimage.hs_fs"):
+    # CCS 20 / MCU+ SDK 12 projects commonly emit ``<name>.mcelf.hs_fs`` or
+    # ``<name>.mcelf.hs``. Makefile builds may use the appimage spelling.
+    if name.endswith(".appimage.hs_fs") or name.endswith(".mcelf.hs_fs"):
         return "signed_hs_fs"
-    if name.endswith(".appimage.hs_se") or name.endswith(".appimage.hs"):
+    if (
+        name.endswith(".appimage.hs_se") or name.endswith(".appimage.hs")
+        or name.endswith(".mcelf.hs_se") or name.endswith(".mcelf.hs")
+    ):
         return "signed_hs"
     if name.endswith(".appimage"):
         return "unsigned_appimage"

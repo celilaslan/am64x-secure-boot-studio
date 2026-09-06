@@ -117,9 +117,14 @@ def create_uart_flash_plan(
     app = Path(application_image).expanduser().resolve()
     if not app.is_file():
         raise FileNotFoundError(f"Application image bulunamadı: {app.name}")
-    expected_suffix = ".appimage.hs" if target_lifecycle.upper() == "HS-SE" else ".appimage.hs_fs"
-    if not app.name.casefold().endswith(expected_suffix):
-        raise ValueError(f"{target_lifecycle.upper()} için beklenen application çıktısı *{expected_suffix}")
+    expected_suffixes = (
+        (".appimage.hs", ".mcelf.hs", ".appimage.hs_se", ".mcelf.hs_se")
+        if target_lifecycle.upper() == "HS-SE"
+        else (".appimage.hs_fs", ".mcelf.hs_fs")
+    )
+    if not app.name.casefold().endswith(expected_suffixes):
+        expected = " veya ".join(f"*{suffix}" for suffix in expected_suffixes)
+        raise ValueError(f"{target_lifecycle.upper()} için beklenen application çıktısı {expected}")
 
     profile = assess_secure_boot_profile(
         physical_lifecycle=physical_lifecycle,

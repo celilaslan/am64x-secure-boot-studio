@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0-alpha29
+
+- Fixed real Windows CCS/MCU+ SDK 12 output discovery: signed application outputs named `<name>.mcelf.hs_fs` and `<name>.mcelf.hs` are now recognized alongside `.appimage.hs_fs` and `.appimage.hs`.
+- UART/OSPI deployment accepts both official signed filename families while preserving lifecycle checks.
+- Package failures now surface the application/SBL summary and nested checks instead of showing only a generic top-level failure.
+- Regression: 282 tests pass. The reported `hello_world.mcelf.hs_fs` build path is covered directly.
+
 ## 2.0.0-alpha28
 
 - Added one beginner-first **Secure Boot Paketi** flow covering target selection, CCS application build, optional SBL/combined boot-image build, key policy, UART UniFlash planning and post-flash boot instructions.

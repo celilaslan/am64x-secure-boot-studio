@@ -240,7 +240,7 @@ class ApplicationPage(QWidget):
         discovery_title = QLabel("CCS proje veya build klasörünü seç")
         discovery_title.setObjectName("sectionTitle")
         discovery_note = QLabel(
-            "Dosya adını, .mcelf konumunu veya certificate alanlarını bilmeniz gerekmez. Studio .appimage.hs_fs, "
+            "Dosya adını, .mcelf konumunu veya certificate alanlarını bilmeniz gerekmez. Studio .mcelf.hs_fs/.appimage.hs_fs, "
             "unsigned .appimage/.mcelf ve linker .out çıktılarını ayırır; yapılacak sonraki işlemi kendisi gösterir."
         )
         discovery_note.setWordWrap(True)
@@ -279,8 +279,8 @@ class ApplicationPage(QWidget):
 
         layout.addWidget(self._card(
             "Hangi durumda ne olacak?",
-            "HS-FS seçiliyse tek düğmeli build SDK'nin development key'iyle .appimage.hs_fs üretir. "
-            "Hazır .appimage.hs_fs varsa certificate ve key seçmeden doğrulayın. "
+            "HS-FS seçiliyse tek düğmeli build SDK'nin development key'iyle .mcelf.hs_fs veya .appimage.hs_fs üretir. "
+            "Hazır signed çıktı varsa certificate ve key seçmeden doğrulayın. "
             "Kendi development/test key'inizle yeni image gerekiyorsa Studio aynı build ağacındaki unsigned girdiyi seçer; "
             "bir sonraki adımda key'i seçebilir veya oluşturabilirsiniz ve application X.509 certificate TI signer tarafından "
             "otomatik eklenir. HS-SE için kullanılan key'in provision edilmiş customer Root of Trust ile eşleşmesi gerekir."
@@ -293,7 +293,7 @@ class ApplicationPage(QWidget):
         manual_title = QLabel("Gerekirse: unsigned girdiyi doğrudan seç")
         manual_title.setObjectName("sectionTitle")
         manual_note = QLabel(
-            "Bu seçenek standalone/custom signing içindir. CCS zaten .appimage.hs_fs ürettiyse bu alanı kullanmayın."
+            "Bu seçenek standalone/custom signing içindir. CCS zaten .mcelf.hs_fs/.appimage.hs_fs ürettiyse bu alanı kullanmayın."
         )
         manual_note.setWordWrap(True)
         manual_note.setObjectName("mutedText")

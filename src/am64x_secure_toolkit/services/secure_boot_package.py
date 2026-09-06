@@ -78,7 +78,11 @@ def build_secure_boot_package(
     summary = (
         f"{profile.target_lifecycle} {'tam boot paketi' if full_requested else 'secure application'} hazır."
         if status == "PASS" else
-        "Secure boot paketi tamamlanamadı; application/SBL alt sonuçlarını kontrol edin."
+        "Secure boot paketi tamamlanamadı: " + (
+            application.get("summary", "application build başarısız")
+            if application.get("status") != "PASS"
+            else (boot or {}).get("summary", "çıktı doğrulaması başarısız")
+        )
     )
     if status == "PASS" and profile.offline_only:
         summary += " Paket çevrimdışı hazırlandı; seçili fiziksel karta yazma güvenlik kapısı nedeniyle kapalı."
@@ -96,11 +100,18 @@ def build_secure_boot_package(
         "outputs": outputs,
         "checks": [
             {"check": "physical_and_target_lifecycle_distinguished", "status": "PASS"},
-            {"check": "application_secure_build", "status": application.get("status", "FAIL")},
+            {"check": "application_secure_build", "status": application.get("status", "FAIL"), "detail": application.get("summary", "")},
             {"check": "application_certificate_and_image_verify", "status": application_verification.get("status", "NOT_CHECKED") if application_verification else "NOT_CHECKED"},
             {"check": "boot_image_build", "status": boot.get("status", "FAIL") if full_requested and boot else "NOT_NEEDED"},
             {"check": "global_devconfig_unchanged", "status": "PASS"},
             {"check": "otp_efuse_untouched", "status": "PASS"},
+        ] + [
+            {
+                "check": f"application_{item.get('check', 'check')}",
+                "status": item.get("status", "NOT_CHECKED"),
+                "detail": item.get("detail") or item.get("summary") or "Application build alt kontrolü",
+            }
+            for item in application.get("checks", [])
         ],
         "claims": [
             "MCU+ SDK proje recipe'leri host üzerinde lifecycle hedefiyle çalıştırıldı.",

@@ -9,6 +9,8 @@ from am64x_secure_toolkit.services.ccs_build import (
 def test_classifies_common_mcu_plus_sdk_application_outputs():
     assert classify_application_artifact("hello.release.appimage.hs_fs") == "signed_hs_fs"
     assert classify_application_artifact("hello.release.appimage.hs") == "signed_hs"
+    assert classify_application_artifact("hello_world.mcelf.hs_fs") == "signed_hs_fs"
+    assert classify_application_artifact("hello_world.mcelf.hs") == "signed_hs"
     assert classify_application_artifact("hello.release.appimage") == "unsigned_appimage"
     assert classify_application_artifact("hello.release.mcelf") == "unsigned_mcelf"
     assert classify_application_artifact("hello.release.out") == "linked_elf"
@@ -24,6 +26,14 @@ def test_signed_hs_fs_output_is_preferred_over_unsigned_input(tmp_path: Path):
     assert result["recommended_action"] == "VERIFY_EXISTING"
     assert result["recommended"]["path"] == str(signed)
     assert len(result["unsigned"]) == 1
+
+
+def test_ccs_mcelf_hs_fs_output_is_recognized_as_ready_signed(tmp_path: Path):
+    signed = tmp_path / "hello_world.mcelf.hs_fs"
+    signed.write_bytes(b"signed")
+    result = scan_ccs_application_build(tmp_path)
+    assert result["state"] == "READY_SIGNED"
+    assert result["recommended"]["path"] == str(signed)
 
 
 def test_unsigned_output_is_ready_for_signing_or_ccs_configuration(tmp_path: Path):

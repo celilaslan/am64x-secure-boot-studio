@@ -125,6 +125,15 @@ def test_flash_plan_uses_offsets_from_sdk_config_and_requires_matching_lifecycle
     assert "0x80000" in plan.generated_config
     assert plan.otp_efuse_write is False
 
+    mcelf = tmp_path / "hello.mcelf.hs_fs"
+    mcelf.write_bytes(b"signed")
+    mcelf_plan = create_uart_flash_plan(
+        sdk_root=sdk, serial_port="COM8", physical_lifecycle="HS-FS",
+        target_lifecycle="HS-FS", customer_root_state="unknown",
+        application_image=mcelf,
+    )
+    assert mcelf_plan.application_image.endswith("hello.mcelf.hs_fs")
+
     with pytest.raises(PermissionError, match="Karta yazma kapalı"):
         create_uart_flash_plan(
             sdk_root=sdk, serial_port="COM7", physical_lifecycle="HS-SE",
