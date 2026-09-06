@@ -11,6 +11,7 @@ from .ccs_build import scan_ccs_application_build
 
 
 _MAKEFILE_NAMES = ("makefile", "Makefile", "GNUmakefile")
+_CCS_BOOTIMAGE_MAKEFILE = "makefile_ccs_bootimage_gen"
 _SKIP_DIRS = {".git", ".venv", "venv", "__pycache__", "node_modules"}
 
 
@@ -106,6 +107,114 @@ def _safe_console(text: str, *, secret_stage: Path | None) -> str:
     return "\n".join(lines[-120:])
 
 
+def _find_ccs_bootimage_recipe(make_dir: Path) -> tuple[Path, Path] | None:
+    """Locate TI's fixed-name CCS post-build recipe near the selected build directory."""
+    current = make_dir
+    for _ in range(5):
+        recipe = current / _CCS_BOOTIMAGE_MAKEFILE
+        if recipe.is_file():
+            return current, recipe
+        if current.parent == current:
+            break
+        current = current.parent
+    return None
+
+
+def _read_small_project_files(project_root: Path, make_dir: Path) -> list[str]:
+    candidates = [
+        project_root / ".cproject",
+        project_root / ".project",
+        project_root / _CCS_BOOTIMAGE_MAKEFILE,
+        make_dir / "makefile",
+        make_dir / "Makefile",
+        *make_dir.glob("*.mk"),
+    ]
+    texts: list[str] = []
+    seen: set[Path] = set()
+    for candidate in candidates:
+        if candidate in seen or not candidate.is_file():
+            continue
+        seen.add(candidate)
+        try:
+            if candidate.stat().st_size <= 2_000_000:
+                texts.append(candidate.read_text(encoding="utf-8", errors="replace"))
+        except OSError:
+            continue
+    return texts
+
+
+def _assignment_path(texts: list[str], variable: str) -> Path | None:
+    """Read a concrete make assignment without expanding or executing project text."""
+    import re
+
+    pattern = re.compile(
+        rf"(?im)^\s*{re.escape(variable)}\s*(?::|\?|\+)?=\s*[\"']?([^\"'\r\n]+)"
+    )
+    for content in texts:
+        match = pattern.search(content)
+        if not match:
+            continue
+        raw = match.group(1).strip().rstrip("\\").strip()
+        if "$" in raw or not raw:
+            continue
+        candidate = Path(raw).expanduser()
+        if candidate.is_dir():
+            return candidate.resolve()
+    return None
+
+
+def _discover_ccs_tool_paths(project_root: Path, make_dir: Path, sdk: Path | None) -> dict[str, str]:
+    """Best-effort discovery of values normally injected by the CCS IDE."""
+    texts = _read_small_project_files(project_root, make_dir)
+    compiler = None
+    env_compiler = os.environ.get("CG_TOOL_ROOT")
+    if env_compiler and Path(env_compiler).is_dir():
+        compiler = Path(env_compiler).resolve()
+    if compiler is None:
+        compiler = _assignment_path(texts, "CG_TOOL_ROOT")
+
+    ccs_install = None
+    env_ccs = os.environ.get("CCS_INSTALL_DIR")
+    if env_ccs and Path(env_ccs).is_dir():
+        ccs_install = Path(env_ccs).resolve()
+    if ccs_install is None:
+        ccs_install = _assignment_path(texts, "CCS_INSTALL_DIR")
+    if ccs_install is None and compiler is not None:
+        parents = list(compiler.parents)
+        for parent in parents:
+            if parent.name.casefold() == "tools":
+                ccs_install = parent.parent
+                break
+
+    search_root = sdk.parent if sdk is not None else None
+    if compiler is None and search_root is not None and search_root.is_dir():
+        matches: list[Path] = []
+        for ccs_dir in search_root.glob("ccs*"):
+            matches.extend((ccs_dir / "tools" / "compiler").glob("ti-cgt-armllvm_*"))
+            matches.extend((ccs_dir / "ccs" / "tools" / "compiler").glob("ti-cgt-armllvm_*"))
+        matches = [path for path in matches if path.is_dir()]
+        if matches:
+            compiler = sorted(matches, key=lambda path: path.name, reverse=True)[0].resolve()
+            if ccs_install is None:
+                ccs_install = compiler.parents[2]
+
+    values = {"CCS_IDE_MODE": os.environ.get("CCS_IDE_MODE", "desktop")}
+    if compiler is not None:
+        values["CG_TOOL_ROOT"] = str(compiler)
+    if ccs_install is not None:
+        values["CCS_INSTALL_DIR"] = str(ccs_install)
+    return values
+
+
+def _select_outname(scan: dict[str, Any], make_dir: Path) -> str | None:
+    linked = scan.get("linked_elf", [])
+    same_profile = [
+        item for item in linked if Path(item["path"]).parent.resolve() == make_dir.resolve()
+    ]
+    candidates = same_profile or linked
+    return Path(candidates[0]["name"]).stem if candidates else None
+
+
 def run_mcu_plus_secure_build(
     project_or_build_dir: str | Path,
     *,
@@ -166,6 +275,9 @@ def run_mcu_plus_secure_build(
         }
 
     secret_stage: Path | None = None
+    post_command_safe: list[str] | None = None
+    post_exit_code: int | None = None
+    post_recipe_found = False
     try:
         with tempfile.TemporaryDirectory(prefix="securestudio-build-") as temp_name:
             secret_stage = Path(temp_name)
@@ -192,18 +304,86 @@ def run_mcu_plus_secure_build(
                 timeout=timeout_seconds,
                 check=False,
             )
-            console = _safe_console((proc.stdout or "") + "\n" + (proc.stderr or ""), secret_stage=secret_stage)
+            console_text = (proc.stdout or "") + "\n" + (proc.stderr or "")
+
+            after_main = scan_ccs_application_build(selected_root)
+            expected_after_main = [
+                item for item in after_main["signed"] if item["kind"] == config["expected_kind"]
+            ]
+            recipe_info = _find_ccs_bootimage_recipe(make_dir)
+            if proc.returncode == 0 and not expected_after_main and recipe_info is not None:
+                post_recipe_found = True
+                project_root, recipe = recipe_info
+                outname = _select_outname(after_main, make_dir)
+                if outname is not None:
+                    profile = make_dir.name
+                    post_public_variables = [
+                        f"OUTNAME={outname}",
+                        f"PROFILE={profile}",
+                        f"DEVICE=am64x",
+                        *public_variables,
+                    ]
+                    if sdk is not None:
+                        post_public_variables.append(f"MCU_PLUS_SDK_PATH={sdk}")
+                    tool_paths = _discover_ccs_tool_paths(project_root, make_dir, sdk)
+                    post_public_variables.extend(
+                        f"{name}={value}" for name, value in tool_paths.items()
+                    )
+                    post_command = [
+                        str(make_bin), "-C", str(project_root), "-f", recipe.name,
+                        *post_public_variables,
+                    ]
+                    post_command_safe = [
+                        make_bin.name, "-C", str(project_root), "-f", recipe.name,
+                        *post_public_variables,
+                    ]
+                    if key is not None:
+                        post_command.append(f"APP_SIGNING_KEY={staged_key}")
+                        post_command_safe.append(
+                            "APP_SIGNING_KEY=<TEMP_SECRET_STAGE>/app_signing_key.pem"
+                        )
+                    if mek is not None:
+                        post_command.append(f"APP_ENCRYPTION_KEY={staged_mek}")
+                        post_command_safe.append(
+                            "APP_ENCRYPTION_KEY=<TEMP_SECRET_STAGE>/app_encryption_key.txt"
+                        )
+                    post_proc = subprocess.run(
+                        post_command,
+                        cwd=project_root,
+                        env=process_env,
+                        capture_output=True,
+                        text=True,
+                        timeout=timeout_seconds,
+                        check=False,
+                    )
+                    post_exit_code = post_proc.returncode
+                    console_text += "\n--- CCS boot-image post-build ---\n"
+                    console_text += (post_proc.stdout or "") + "\n" + (post_proc.stderr or "")
+            console = _safe_console(console_text, secret_stage=secret_stage)
     except subprocess.TimeoutExpired as exc:
         raise TimeoutError(f"CCS/MCU+ SDK secure build {timeout_seconds} saniyede tamamlanmadı") from exc
 
     after = scan_ccs_application_build(selected_root)
+    recipe_info = _find_ccs_bootimage_recipe(make_dir)
+    if not any(item["kind"] == config["expected_kind"] for item in after["signed"]):
+        if recipe_info is not None and recipe_info[0] != selected_root:
+            project_scan = scan_ccs_application_build(recipe_info[0])
+            if any(item["kind"] == config["expected_kind"] for item in project_scan["signed"]):
+                after = project_scan
     expected = [item for item in after["signed"] if item["kind"] == config["expected_kind"]]
     output = expected[0] if expected else None
-    status = "PASS" if proc.returncode == 0 and output is not None else "FAIL"
+    commands_ok = proc.returncode == 0 and post_exit_code in (None, 0)
+    status = "PASS" if commands_ok and output is not None else "FAIL"
     if proc.returncode != 0:
         summary = "MCU+ SDK make işlemi başarısız oldu; son console satırları Teknik Ayrıntılar bölümünde."
+    elif post_exit_code not in (None, 0):
+        summary = "CCS boot-image post-build işlemi başarısız oldu; son console satırları Teknik Ayrıntılar bölümünde."
     elif output is None:
-        summary = "Make tamamlandı ancak lifecycle ile uyumlu signed application image bulunamadı."
+        summary = (
+            "CCS post-build tarifi bulundu ancak çalıştırılamadı: build klasöründe OUTNAME için .out bulunamadı."
+            if post_recipe_found and post_command_safe is None
+            else "Make tamamlandı ancak lifecycle ile uyumlu signed application image bulunamadı."
+        )
     else:
         summary = f"Secure application hazır: {output['name']}"
     return {
@@ -217,11 +397,21 @@ def run_mcu_plus_secure_build(
         "make_directory": str(make_dir),
         "safe_command": safe_command,
         "exit_code": proc.returncode,
+        "post_build_safe_command": post_command_safe,
+        "post_build_exit_code": post_exit_code,
         "console_excerpt": console,
         "output": output,
         "outputs": ([{"type": "application_image", "path": output["path"]}] if output else []),
         "checks": [
             {"check": "mcu_plus_sdk_make", "status": "PASS" if proc.returncode == 0 else "FAIL"},
+            {
+                "check": "ccs_bootimage_post_build",
+                "status": (
+                    "PASS" if post_exit_code == 0 else
+                    "FAIL" if post_exit_code is not None or (post_recipe_found and post_command_safe is None) else
+                    "NOT_NEEDED"
+                ),
+            },
             {"check": "signed_output_discovery", "status": "PASS" if output else "FAIL"},
             {"check": "global_devconfig_unchanged", "status": "PASS"},
         ],
