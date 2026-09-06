@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0-alpha31
+
+- Fixed a false verification failure against real MCU+ SDK output: TI's official `appimage_x509_cert_gen.py` encodes its default `destAddr` as the 4-byte OCTET STRING `00000000`, while Studio had required exactly 8 bytes.
+- Host verification now accepts the official 4-byte form and the full 8-byte form for application destination/reset-vector addresses; unexpected widths still fail closed.
+- Added a complete certificate + payload regression using the real `hello_world.mcelf.hs_fs` structure and 4-byte default destination address.
+- Regression: 284 tests pass. Certificate signature, declared payload size and SHA-512 binding remain mandatory.
+
 ## 2.0.0-alpha30
 
 - Added zero-click SDK discovery for standard Windows TI installs such as `C:\\ti\\mcu_plus_sdk_am64x_*`, plus Linux `/opt/ti`, `/ti`, user `ti` directory and TI/Studio environment-variable locations.

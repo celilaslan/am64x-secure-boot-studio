@@ -153,12 +153,17 @@ def verify_artifact(path: str | Path) -> dict[str, Any]:
 
     load = inspected.get("decoded", {}).get("sysfw_image_load")
     if load and "decode_error" not in load:
+        # TI's official appimage_x509_cert_gen.py emits the default destination as
+        # FORMAT:HEX,OCT:00000000 (4 bytes). Studio-created profiles may use the
+        # full 64-bit representation. Both are valid OCTET STRING encodings; other
+        # widths remain a structural failure.
+        address_width_ok = load["dest_addr_length"] in {4, 8}
         checks.extend([
             {
                 "check": "load_dest_addr_width",
-                "status": "PASS" if load["dest_addr_length"] == 8 else "FAIL",
+                "status": "PASS" if address_width_ok else "FAIL",
                 "actual_bytes": load["dest_addr_length"],
-                "expected_bytes": 8,
+                "allowed_bytes": [4, 8],
             },
             {
                 "check": "load_auth_mode",
@@ -179,9 +184,9 @@ def verify_artifact(path: str | Path) -> dict[str, Any]:
         checks.extend([
             {
                 "check": "boot_reset_vector_width",
-                "status": "PASS" if boot["reset_vector_length"] == 8 else "FAIL",
+                "status": "PASS" if boot["reset_vector_length"] in {4, 8} else "FAIL",
                 "actual_bytes": boot["reset_vector_length"],
-                "expected_bytes": 8,
+                "allowed_bytes": [4, 8],
             },
             {
                 "check": "boot_reserved_fields",

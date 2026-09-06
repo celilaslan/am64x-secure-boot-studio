@@ -69,6 +69,33 @@ def test_application_artifact_round_trip(tmp_path):
     assert ver["overall_host_side_verification"] == "PASS"
 
 
+def test_official_sdk_four_byte_default_load_address_is_valid(tmp_path):
+    """appimage_x509_cert_gen.py uses FORMAT:HEX,OCT:00000000 by default."""
+    payload = b"MCELF" * 32
+    integ = SysfwImageIntegrity({
+        "shaType": "2.16.840.1.101.3.4.2.3",
+        "shaValue": hashlib.sha512(payload).digest(),
+        "imageSize": len(payload),
+    }).dump()
+    load = SysfwImageLoad({
+        "destAddr": bytes.fromhex("00000000"),
+        "authType": 1,
+    }).dump()
+    cert = _cert_with_extensions([
+        (TI_OIDS["sysfw_image_integrity"], integ),
+        (TI_OIDS["sysfw_image_load"], load),
+    ])
+    image = tmp_path / "hello_world.mcelf.hs_fs"
+    image.write_bytes(cert + payload)
+    result = verify_artifact(image)
+    width = next(item for item in result["checks"] if item["check"] == "load_dest_addr_width")
+    assert width == {
+        "check": "load_dest_addr_width", "status": "PASS",
+        "actual_bytes": 4, "allowed_bytes": [4, 8],
+    }
+    assert result["overall_host_side_verification"] == "PASS"
+
+
 def test_rom_combined_component_hashes(tmp_path):
     c1 = b"ABCD"
     c2 = b"EFGHIJKL"
