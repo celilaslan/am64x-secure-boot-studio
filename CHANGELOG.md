@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0-alpha33
+
+- Added `studio.sh` for restricted Linux hosts: no sudo, Git or manual virtual-environment activation is required.
+- The launcher keeps one reusable environment under the user's XDG cache, automatically links the currently extracted source directory and launches the GUI.
+- Git-less updates are supported by downloading/extracting the repository ZIP and running the same launcher from the new directory.
+- Regression: 288 tests pass.
+
 ## 2.0.0-alpha32
 
 - Connected Certificate Center directly to the CCS Secure Boot workflow: a newly created application certificate and its matching private key are automatically selected for the current Studio session.

@@ -1,12 +1,12 @@
 # AM64x Secure Boot Studio / Toolkit
 
-**Current development release: `2.0.0-alpha32`**
+**Current development release: `2.0.0-alpha33`**
 
 Alpha21 introduces the AM64x-focused **Certificate Center** for from-scratch Subject entry, Application/Secure Debug certificate creation, inspect/verify/export/reissue/compare and public Project Certificate Library workflows.
 
 AM64x/AM6442 Secure Boot çalışmalarında kullanılan image, X.509 certificate, key ve SDK yapılandırmalarını hazırlamak, incelemek ve doğrulamak için geliştirilmiş Python araç seti ve rehberli masaüstü uygulamasıdır. Toolkit, Texas Instruments MCU+ SDK içindeki `rom_image_gen.py` ve `appimage_x509_cert_gen.py` araçlarının yerine geçmez; bu araçlarla yürütülen işlemlerin çevresine ek kontrol ve doğrulama katmanı sağlar.
 
-Current Studio development build: `2.0.0-alpha32` (real Windows/board validation in progress; final release not declared).
+Current Studio development build: `2.0.0-alpha33` (real Windows/board validation in progress; final release not declared).
 
 Araç seti şu teknik sürümler esas alınarak geliştirilmiştir:
 
@@ -133,6 +133,14 @@ Windows kaynak checkout'unda venv aktive etmeden çalıştırmak için yalnız �
 ```
 
 `studio.cmd` ilk kullanımda `.venv` ve GUI bağımlılıklarını hazırlar. Kurulum editable olduğu için sonraki `git pull` işlemlerinden sonra tekrar kurulum veya venv aktivasyonu gerekmez.
+
+Linux'ta sudo, Git veya manuel venv aktivasyonu gerekmeden çalıştırmak için:
+
+```bash
+bash studio.sh
+```
+
+`studio.sh`, ortamı proje klasörünün içine değil kullanıcı cache dizinine kurar. Git kullanamıyorsanız GitHub'da **Code → Download ZIP** ile yeni sürümü indirip çıkarın ve yeni klasörde yine `bash studio.sh` çalıştırın. Aynı kullanıcı ortamı yeniden kullanılır; yalnız yeni kaynak klasörü otomatik bağlanır. Script hiçbir aşamada `sudo` veya `git` çağırmaz.
 
 ## CCS'den karta giden kısa yol
 
