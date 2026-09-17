@@ -1,0 +1,47 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local tool output (generated, never committed)
+qt-visual-qa/
+diagnostics.md
+verification-report.md
+*.log
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Security: never commit key material, secrets or signed build output.
+# Studio itself refuses to write secrets into a Project Workspace; this is a
+# second line of defence for files created outside it.
+*.pem
+*.der
+*.key
+*.hex
+private/
+secrets/
+keys-out/
+*.appimage.hs
+*.appimage.hs_fs
+*.mcelf.hs
+*.mcelf.hs_fs
