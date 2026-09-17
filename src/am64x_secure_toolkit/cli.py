@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 from . import __version__
-from .build import build_app, build_rom
 from .boardcfg import (
     check_boardcfg_profile,
     evaluate_debug_policy,
@@ -14,23 +13,8 @@ from .boardcfg import (
     save_boardcfg_profile,
     template_boardcfg_profile,
 )
+from .build import build_app, build_rom
 from .certificate import build_certificate, explain_certificate, render_openssl_config
-from .inspect import inspect_artifact
-from .negative import create_negative_variant, run_negative_suite
-from .keycheck import compare_key_material, preflight_mek, preflight_signing_key
-from .keygen import generate_key_set, generate_mek, generate_signing_key
-from .services.environment import resolve_environment
-from .services.certificate_center import (
-    add_certificate_to_library, certificate_metadata, compare_certificate_with_private_key, compare_certificates,
-    export_certificate, export_public_key_der, list_certificate_library, remove_certificate_from_library,
-    save_cloned_profile,
-)
-from .services.project import create_project, open_project
-from .profiles import save_profile, template_profile, validate_profile_file
-from .provision import provision_preflight, save_provision_profile, template_provision_profile
-from .revision import key_revision_matrix, simulate_key_revision, simulate_swrev, swrev_field_info
-from .sdk_lint import lint_sdk_security
-from .sdk_diff import compare_sdk_security
 from .errata import check_errata, list_errata
 from .generic_data import (
     build_generic_data,
@@ -39,12 +23,34 @@ from .generic_data import (
     validate_generic_data_profile,
     verify_generic_data,
 )
-from .verify import verify_artifact
-from .reporting import write_image_report, write_batch_report
+from .inspect import inspect_artifact
+from .keycheck import compare_key_material, preflight_mek, preflight_signing_key
+from .keygen import generate_key_set, generate_mek, generate_signing_key
+from .negative import create_negative_variant, run_negative_suite
+from .profiles import save_profile, template_profile, validate_profile_file
+from .provision import provision_preflight, save_provision_profile, template_provision_profile
 from .release_scan import scan_release_tree
-from .services.network_policy import runtime_network_policy
+from .reporting import write_batch_report, write_image_report
+from .revision import key_revision_matrix, simulate_key_revision, simulate_swrev, swrev_field_info
+from .sdk_diff import compare_sdk_security
+from .sdk_lint import lint_sdk_security
 from .services.beta_readiness import beta_readiness
+from .services.certificate_center import (
+    add_certificate_to_library,
+    certificate_metadata,
+    compare_certificate_with_private_key,
+    compare_certificates,
+    export_certificate,
+    export_public_key_der,
+    list_certificate_library,
+    remove_certificate_from_library,
+    save_cloned_profile,
+)
 from .services.diagnostics import diagnostics_snapshot, write_diagnostics
+from .services.environment import resolve_environment
+from .services.network_policy import runtime_network_policy
+from .services.project import create_project, open_project
+from .verify import verify_artifact
 
 
 def _emit(obj: dict, pretty: bool = True) -> None:
@@ -79,7 +85,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}", help="Toolkit sürümünü göster ve çık")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p_gui = _tr_help(sub.add_parser("gui", help="AM64x Secure Boot Studio masaüstü arayüzünü aç"))
+    _tr_help(sub.add_parser("gui", help="AM64x Secure Boot Studio masaüstü arayüzünü aç"))
 
     p_env = _tr_help(sub.add_parser("environment", help="MCU+ SDK ve security tool environment durumunu otomatik kontrol et"))
     p_env.add_argument("--sdk-root", type=Path, help="İsteğe bağlı MCU+ SDK root; verilmezse güvenli adaylar aranır")

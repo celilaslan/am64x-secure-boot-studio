@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 """Display-oriented model for SDK security semantic comparison.
 
 The model deliberately omits full host paths and secret-bearing source text. It surfaces
 only mapped security semantics, hashes already present in the diff result, and review state.
 """
+
+from __future__ import annotations
 
 from typing import Any
 
