@@ -30,3 +30,23 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 140
+target-version = "py310"
+src = ["src", "tests", "tools"]
+
+[tool.ruff.lint]
+# Correctness, import hygiene and modern-syntax rules are enforced.
+select = ["E4", "E9", "F", "I", "UP", "RUF100"]
+# Deliberately not enforced:
+#   E7     - the GUI layer builds widgets with `w = QPushButton(...); w.clicked.connect(...)`
+#            one-liners throughout. That is a consistent, intentional house style.
+#   BLE001 - GUI action handlers catch broad exceptions on purpose and route every
+#            failure through show_guided_error(), so the Studio reports errors
+#            instead of dying on a background failure.
+#   TRY004 - host-side checks report validation failures as results, not raises.
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["am64x_secure_toolkit"]

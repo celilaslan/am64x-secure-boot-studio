@@ -6,10 +6,10 @@ import re
 from pathlib import Path
 
 from am64x_secure_toolkit.release_scan import scan_release_tree
+from am64x_secure_toolkit.services.beta_readiness import beta_readiness
 from am64x_secure_toolkit.services.environment import resolve_environment
 from am64x_secure_toolkit.services.network_policy import runtime_network_policy
 from am64x_secure_toolkit.services.ux_audit import audit_gui_sources
-from am64x_secure_toolkit.services.beta_readiness import beta_readiness
 
 
 def main() -> int:

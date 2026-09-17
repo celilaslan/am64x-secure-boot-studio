@@ -4,8 +4,8 @@ import ast
 from pathlib import Path
 
 from am64x_secure_toolkit.release_scan import scan_release_tree
-from am64x_secure_toolkit.services.network_policy import runtime_network_policy
 from am64x_secure_toolkit.services.environment import resolve_environment
+from am64x_secure_toolkit.services.network_policy import runtime_network_policy
 
 
 def test_release_scan_detects_private_key_without_echoing_secret(tmp_path: Path):

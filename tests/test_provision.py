@@ -7,8 +7,8 @@ import yaml
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from am64x_secure_toolkit.provision import provision_preflight, save_provision_profile, template_provision_profile
 from am64x_secure_toolkit.profiles import validate_profile
+from am64x_secure_toolkit.provision import provision_preflight, save_provision_profile, template_provision_profile
 
 
 def _public_der(tmp_path: Path, name: str, bits: int = 4096) -> Path:

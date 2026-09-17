@@ -3,7 +3,6 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-
 GUI = Path(__file__).parents[1] / "src/am64x_secure_toolkit/gui"
 
 

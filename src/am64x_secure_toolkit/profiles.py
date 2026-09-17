@@ -10,7 +10,6 @@ import yaml
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-
 PROFILE_TYPES = {"application", "debug", "rom", "keywriter_preflight"}
 
 

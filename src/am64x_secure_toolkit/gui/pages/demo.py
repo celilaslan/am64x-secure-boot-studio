@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from PySide6.QtWidgets import QLabel, QPushButton, QPlainTextEdit, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QLabel, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget
 
 from ...services.demo import create_demo_workspace
 from .common import file_field, show_guided_error

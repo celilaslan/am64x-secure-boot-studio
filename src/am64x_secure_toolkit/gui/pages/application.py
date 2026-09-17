@@ -9,9 +9,9 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QFrame,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QLineEdit,
-    QInputDialog,
     QPushButton,
     QRadioButton,
     QScrollArea,
@@ -25,8 +25,8 @@ from ...services.ccs_secure_build import run_mcu_plus_secure_build
 from ...services.environment import resolve_environment
 from ...services.project import path_is_within_project, suggest_project_output
 from ...workflows.application import application_build_workflow
-from ...workflows.keys import generate_keys_workflow
 from ...workflows.inspect import inspect_and_verify
+from ...workflows.keys import generate_keys_workflow
 from ..widgets import HumanResultView
 from .common import file_field, require_field, set_field_invalid, show_guided_error
 
@@ -955,5 +955,6 @@ class ApplicationPage(QWidget):
 
 # Keep tiny aliases local to avoid importing broad Qt namespaces merely for two flags.
 from PySide6.QtCore import Qt  # noqa: E402
+
 QtAlignCenter = Qt.AlignCenter
 TextSelectable = Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard

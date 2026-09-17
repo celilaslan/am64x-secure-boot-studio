@@ -3,22 +3,21 @@ from __future__ import annotations
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QHBoxLayout, QListWidget, QListWidgetItem, QMainWindow, QStackedWidget, QVBoxLayout, QWidget
 
-from ..services.ui_contract import page_visible
 from ..services.presentation import result_presentation
+from ..services.ui_contract import page_visible
 from .pages.application import ApplicationPage
 from .pages.boardcfg import BoardCfgPage
 from .pages.certificate_enhanced import CertificatePage
+from .pages.demo import DemoPage
+from .pages.diagnostics import DiagnosticsPage
 from .pages.environment import EnvironmentPage
 from .pages.errata import ErrataPage
 from .pages.generic_data import GenericDataPage
 from .pages.guide import GuidePage
-from .pages.learn import LearnPage
-from .pages.demo import DemoPage
-from .pages.diagnostics import DiagnosticsPage
-from .pages.source_trace import SourceTracePage
 from .pages.home import HomePage
 from .pages.inspector import InspectorPage
 from .pages.keys import KeysPage
+from .pages.learn import LearnPage
 from .pages.negative import NegativePage
 from .pages.project import ProjectPage
 from .pages.provisioning import ProvisioningPage
@@ -26,8 +25,9 @@ from .pages.reports import ReportsPage
 from .pages.revision import RevisionPage
 from .pages.rom import RomPage
 from .pages.sdk import SdkPage
-from .pages.secure_debug import SecureDebugPage
 from .pages.secure_boot import SecureBootPage
+from .pages.secure_debug import SecureDebugPage
+from .pages.source_trace import SourceTracePage
 from .state import AppState
 from .widgets import DeviceContextBar
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLabel, QPushButton, QPlainTextEdit, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLabel, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget
 
 from ...services.guidance import recommend_workflow
 

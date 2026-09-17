@@ -9,7 +9,6 @@ import yaml
 
 from .inspect import inspect_artifact
 
-
 PROFILE_TYPE = "security_boardcfg_policy"
 SECDBG_MAGIC = 0x42AF
 OTP_MAGIC = 0x4081

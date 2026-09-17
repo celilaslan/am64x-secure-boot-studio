@@ -2,11 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import re
 from pathlib import Path
 from typing import Any
-
 
 PROJECT_REFERENCE_HASHES = {
     "devconfig": "286cfcf740fb57461fd1aa6221a302541e68ec55425d5aa5f5bb57b2cb625c4a",

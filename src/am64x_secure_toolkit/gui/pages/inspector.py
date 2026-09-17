@@ -53,14 +53,14 @@ class InspectorPage(QWidget):
         if path:
             self.path.setText(path)
 
-    def dragEnterEvent(self, event: QDragEnterEvent) -> None:  # noqa: N802 - Qt API
+    def dragEnterEvent(self, event: QDragEnterEvent) -> None:
         urls = event.mimeData().urls() if event.mimeData().hasUrls() else []
         if any(url.isLocalFile() and Path(url.toLocalFile()).is_file() for url in urls):
             event.acceptProposedAction()
         else:
             event.ignore()
 
-    def dropEvent(self, event: QDropEvent) -> None:  # noqa: N802 - Qt API
+    def dropEvent(self, event: QDropEvent) -> None:
         for url in event.mimeData().urls():
             if url.isLocalFile() and Path(url.toLocalFile()).is_file():
                 self.path.setText(url.toLocalFile())

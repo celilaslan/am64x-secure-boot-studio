@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from .sdk_lint import (
     _display_path,
@@ -12,7 +13,6 @@ from .sdk_lint import (
     _secret_hygiene_findings,
     _sha256,
 )
-
 
 _ROLES = ("devconfig", "app_makefile", "sbl_makefile", "app_tool", "rom_tool")
 

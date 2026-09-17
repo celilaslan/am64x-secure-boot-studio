@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 from typing import Any
 
-
 _SKIP_DIRS = {
     ".git",
     ".hg",

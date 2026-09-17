@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
+
 
 class PlaceholderPage(QWidget):
     def __init__(self,title:str,detail:str):

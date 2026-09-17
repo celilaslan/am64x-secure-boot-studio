@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable
 
 _PRIVATE_BLOCK = re.compile(
     rb"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----[\s\S]{16,}?-----END (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"

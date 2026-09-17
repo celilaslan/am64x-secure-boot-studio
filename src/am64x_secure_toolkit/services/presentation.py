@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from .secret_policy import sanitize_for_record
 from .explanations import explain_check
-
+from .secret_policy import sanitize_for_record
 
 _STATUS_TEXT = {
     "PASS": "Başarılı",

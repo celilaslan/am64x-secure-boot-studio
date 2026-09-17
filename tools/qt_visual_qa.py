@@ -26,6 +26,7 @@ def main(argv: list[str] | None = None) -> int:
 
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     from PySide6.QtWidgets import QApplication
+
     from am64x_secure_toolkit.gui.main_window import MainWindow
 
     out_dir.mkdir(parents=True, exist_ok=True)

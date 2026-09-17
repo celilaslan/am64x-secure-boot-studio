@@ -2,7 +2,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtWidgets import QComboBox, QFileDialog, QFormLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QTabWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QComboBox,
+    QFormLayout,
+    QLabel,
+    QPushButton,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 from ...sdk_diff import compare_sdk_security
 from ...sdk_lint import lint_sdk_security

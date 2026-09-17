@@ -12,9 +12,10 @@ import os
 import platform
 import shlex
 import sys
+from collections.abc import Iterable
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from . import __version__
 from .constants import VERIFICATION_SCOPE

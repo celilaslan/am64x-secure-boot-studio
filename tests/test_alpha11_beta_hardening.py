@@ -8,10 +8,16 @@ import pytest
 
 from am64x_secure_toolkit.cli import main
 from am64x_secure_toolkit.services.beta_readiness import beta_readiness
-from am64x_secure_toolkit.services.diagnostics import diagnostics_markdown, diagnostics_snapshot, write_diagnostics
+from am64x_secure_toolkit.services.diagnostics import diagnostics_snapshot, write_diagnostics
 from am64x_secure_toolkit.services.environment import resolve_environment
 from am64x_secure_toolkit.services.preferences import (
-    UserPreferences, load_preferences, save_preferences, with_context, with_mode, with_recent_project, with_sdk_root,
+    UserPreferences,
+    load_preferences,
+    save_preferences,
+    with_context,
+    with_mode,
+    with_recent_project,
+    with_sdk_root,
 )
 from am64x_secure_toolkit.services.project import create_project
 from am64x_secure_toolkit.services.ui_contract import page_visible

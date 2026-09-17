@@ -4,8 +4,8 @@ from PySide6.QtWidgets import QComboBox, QFormLayout, QLabel, QLineEdit, QPushBu
 
 from ...boardcfg import evaluate_debug_policy
 from ...services.claim_boundary import attach_claims
+from ...services.ui_contract import JTAG_EFUSE_OPTIONS, SECURE_DEBUG_TRANSPORT_OPTIONS
 from ...services.workflow_visuals import secure_debug_visual_model
-from ...services.ui_contract import SECURE_DEBUG_TRANSPORT_OPTIONS, JTAG_EFUSE_OPTIONS
 from ..widgets import FlowDiagramWidget, HumanResultView
 from .common import file_field, show_guided_error
 
