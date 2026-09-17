@@ -115,7 +115,8 @@ def _rom_component_mutation(data: bytes, component_index: int) -> tuple[bytes, d
     components = info.get("decoded", {}).get("rom_ext_boot_info", {}).get("components", [])
     if not 1 <= component_index <= len(components):
         raise ValueError(f"component index geçersiz: {component_index}; geçerli aralık 1..{len(components)}")
-    cert_len = first_der_object_length(data)
+    # Validates that the image starts with a well-formed DER TLV; raises DERError if not.
+    first_der_object_length(data)
     base = 0
     for comp in components[: component_index - 1]:
         base += int(comp["comp_size"])

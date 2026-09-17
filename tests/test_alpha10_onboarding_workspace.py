@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from am64x_secure_toolkit.reporting import write_image_report
 from am64x_secure_toolkit.services.onboarding import onboarding_model
-from am64x_secure_toolkit.services.ux_audit import audit_gui_sources
 from am64x_secure_toolkit.services.project import (
     compact_project_artifacts,
     create_project,
@@ -15,6 +13,7 @@ from am64x_secure_toolkit.services.project import (
     record_project_artifacts,
     suggest_project_output,
 )
+from am64x_secure_toolkit.services.ux_audit import audit_gui_sources
 
 
 def test_onboarding_routes_beginner_through_environment_project_then_workflow():
@@ -126,8 +125,7 @@ def test_beta_ux_source_audit_has_zero_findings():
 
 def test_reporting_result_exposes_generated_outputs_for_project_artifact_index(tmp_path: Path):
     # We only assert the output contract here; cryptographic report content is covered by test_reporting.py.
-    report_source = Path(__file__).resolve().parents[1] / "examples" / "application_profile.yaml"
-    # report_source is not an image; use a minimal synthetic result contract instead of invoking image parsing.
+    # Image parsing is covered by test_reporting.py; this test uses a minimal synthetic result contract.
     result = {
         "operation": "image_report",
         "status": "PASS",

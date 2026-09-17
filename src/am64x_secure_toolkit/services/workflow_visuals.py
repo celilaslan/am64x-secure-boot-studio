@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Display-oriented semantic models for complex Studio workflows.
 
 These helpers are intentionally pure Python. They never read secret values, execute target
@@ -7,8 +5,10 @@ operations, infer missing addresses/IDs, or convert an offline result into hardw
 Qt pages consume these models to render diagrams/cards while tests lock the semantics.
 """
 
-from typing import Any, Iterable
+from __future__ import annotations
 
+from collections.abc import Iterable
+from typing import Any
 
 _VALID_STATUS = {"PASS", "FAIL", "PARTIAL", "NOT_CHECKED", "WARN", "INFO", "ERROR"}
 

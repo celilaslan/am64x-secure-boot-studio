@@ -23,7 +23,6 @@ from typing import Any
 from .build_record import make_build_record, normalize_path, redact_argv, redact_text, write_json
 from .verify import verify_artifact
 
-
 _FAILURE_EXCERPT_MAX_CHARS = 3000
 _FAILURE_EXCERPT_MAX_LINES = 28
 
@@ -203,8 +202,7 @@ def _run(
         argv,
         cwd=cwd,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         check=False,
     )
     duration_ms = round((time.monotonic() - start) * 1000)
@@ -233,7 +231,6 @@ def _run(
         )
 
     wrapper_error: str | None = None
-    produced = execution_output if execution_output is not None else output
     if proc.returncode == 0:
         try:
             if execution_output is not None and execution_output.resolve() != output.resolve():
