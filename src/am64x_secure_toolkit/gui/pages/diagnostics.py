@@ -4,8 +4,14 @@ import json
 from pathlib import Path
 
 from PySide6.QtWidgets import (
-    QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QTableWidget,
-    QTableWidgetItem, QVBoxLayout, QWidget,
+    QHBoxLayout,
+    QLabel,
+    QPlainTextEdit,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
 )
 
 from ...services.diagnostics import diagnostics_markdown, diagnostics_snapshot, write_diagnostics

@@ -13,7 +13,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 from .keycheck import preflight_mek
 
-
 PROFILE_TYPE = "hsfs_to_hsse_preflight"
 
 
@@ -137,7 +136,7 @@ def _validate_optional_swrev(swrev: Any, checks: list[dict[str, Any]]) -> dict[s
                 checks,
                 f"swrev_{field}",
                 "PASS",
-                f"Non-zero revision değeri alanın tek-kopya genişliğiyle uyumlu; eFuse double-redundancy encoding'i bu araç tarafından üretilmez.",
+                "Non-zero revision değeri alanın tek-kopya genişliğiyle uyumlu; eFuse double-redundancy encoding'i bu araç tarafından üretilmez.",
             )
         except Exception as exc:
             out[field] = None

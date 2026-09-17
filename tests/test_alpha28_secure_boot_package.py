@@ -7,8 +7,8 @@ from am64x_secure_toolkit.services.ccs_sbl_build import (
     classify_sbl_artifact,
     run_mcu_plus_sbl_build,
 )
-from am64x_secure_toolkit.services.secure_boot_profile import assess_secure_boot_profile
 from am64x_secure_toolkit.services.secure_boot_package import build_secure_boot_package
+from am64x_secure_toolkit.services.secure_boot_profile import assess_secure_boot_profile
 from am64x_secure_toolkit.services.uart_flash import (
     create_uart_flash_plan,
     execute_uart_flash_plan,

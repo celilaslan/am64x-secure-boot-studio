@@ -8,6 +8,7 @@ import yaml
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
+from am64x_secure_toolkit.constants import TI_OIDS
 from am64x_secure_toolkit.generic_data import (
     build_generic_data,
     template_generic_data_profile,
@@ -15,7 +16,6 @@ from am64x_secure_toolkit.generic_data import (
     verify_generic_data,
 )
 from am64x_secure_toolkit.inspect import inspect_artifact
-from am64x_secure_toolkit.constants import TI_OIDS
 
 
 @pytest.fixture(scope="module")

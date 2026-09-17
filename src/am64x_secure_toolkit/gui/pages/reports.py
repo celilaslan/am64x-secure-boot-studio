@@ -3,11 +3,24 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from PySide6.QtWidgets import QFileDialog, QFormLayout, QHBoxLayout, QLabel, QListWidget, QMessageBox, QPushButton, QPlainTextEdit, QSplitter, QTabWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QFormLayout,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QMessageBox,
+    QPlainTextEdit,
+    QPushButton,
+    QSplitter,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 from ...reporting import write_batch_report, write_image_report
 from ...services.explanations import explain_result
-from ...services.presentation import result_presentation, humanize_identifier, status_text
+from ...services.presentation import humanize_identifier, result_presentation, status_text
 from ...services.project import suggest_project_output
 from ...services.secret_policy import sanitize_for_record
 from ...services.source_registry import source_card

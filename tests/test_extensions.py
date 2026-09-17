@@ -1,14 +1,13 @@
-from asn1crypto import core
 from am64x_secure_toolkit.x509ext import (
+    ExtBootComponent,
+    ExtBootInfo,
     SysfwEncryption,
     SysfwImageIntegrity,
     SysfwImageLoad,
-    ExtBootComponent,
-    ExtBootInfo,
     decode_encryption,
+    decode_ext_boot_info,
     decode_integrity,
     decode_load,
-    decode_ext_boot_info,
 )
 
 

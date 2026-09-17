@@ -3,7 +3,6 @@ from __future__ import annotations
 from PySide6.QtGui import QColor, QFont, QPalette
 from PySide6.QtWidgets import QApplication
 
-
 STYLE_SHEET = r"""
 QMainWindow, QWidget { background: #f4f6f8; color: #20242a; }
 QLabel { background: transparent; }

@@ -2,7 +2,13 @@ from __future__ import annotations
 
 from PySide6.QtWidgets import QFormLayout, QHBoxLayout, QLabel, QPushButton, QTabWidget, QVBoxLayout, QWidget
 
-from ...generic_data import build_generic_data, save_generic_data_profile, template_generic_data_profile, validate_generic_data_profile, verify_generic_data
+from ...generic_data import (
+    build_generic_data,
+    save_generic_data_profile,
+    template_generic_data_profile,
+    validate_generic_data_profile,
+    verify_generic_data,
+)
 from ...services.claim_boundary import attach_claims
 from ...services.workflow_visuals import generic_data_visual_model
 from ..widgets import FlowDiagramWidget, HumanResultView

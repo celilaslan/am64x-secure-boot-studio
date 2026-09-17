@@ -6,7 +6,6 @@ from PySide6.QtWidgets import QFrame, QGridLayout, QHBoxLayout, QLabel, QPushBut
 from ...services.onboarding import onboarding_model
 from ...services.presentation import result_presentation
 
-
 # Kept as a searchable compatibility label for existing documentation/screenshots.
 _LEGACY_APPLICATION_LABEL = "CCS / Secure Application"
 # Previous card contract: ("CCS / Secure Application", "CCS projesini seçin; Studio lifecycle

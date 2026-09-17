@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
-
 _LIFECYCLES = {"GP", "HS-FS", "HS-SE"}
 _ROOT_STATES = {"unknown", "not_provisioned", "provisioned", "hardware_verified"}
 

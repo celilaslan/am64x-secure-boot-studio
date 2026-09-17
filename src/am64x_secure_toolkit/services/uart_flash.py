@@ -10,7 +10,6 @@ from typing import Any
 
 from .secure_boot_profile import assess_secure_boot_profile
 
-
 _PORT_RE = re.compile(r"^COM[1-9][0-9]{0,2}$", re.IGNORECASE)
 _OFFSET_RE = re.compile(r"--flash-offset(?:=|\s+)(0x[0-9a-fA-F]+|[0-9]+)")
 _FILE_RE = re.compile(r"--file(?:=|\s+)(?:\"([^\"]+)\"|'([^']+)'|([^\s]+))")

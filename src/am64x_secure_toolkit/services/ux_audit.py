@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-
 PAGE_KEYS = (
     "home", "guide", "environment", "project", "application", "rom", "inspector",
     "certificate", "keys", "negative", "sdk", "errata", "provisioning", "revision",

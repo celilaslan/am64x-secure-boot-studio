@@ -7,7 +7,6 @@ from pathlib import Path
 import yaml
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
-    QButtonGroup,
     QCheckBox,
     QComboBox,
     QFileDialog,
@@ -18,18 +17,16 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QLabel,
     QLineEdit,
-    QListWidget,
     QMessageBox,
     QPlainTextEdit,
     QPushButton,
-    QRadioButton,
     QScrollArea,
     QSpinBox,
     QSplitter,
     QStackedWidget,
-    QTabWidget,
     QTableWidget,
     QTableWidgetItem,
+    QTabWidget,
     QTreeWidget,
     QTreeWidgetItem,
     QVBoxLayout,
@@ -38,7 +35,7 @@ from PySide6.QtWidgets import (
 
 from ...certificate import build_certificate, render_openssl_config
 from ...inspect import inspect_artifact
-from ...profiles import load_profile, save_profile, template_profile, validate_profile, validate_profile_file
+from ...profiles import save_profile, template_profile, validate_profile, validate_profile_file
 from ...services.certificate_center import (
     AUTH_MODES,
     DEBUG_LEVELS,
@@ -57,7 +54,7 @@ from ...services.certificate_center import (
 from ...services.certificate_explorer import certificate_explorer_model
 from ...services.claim_boundary import attach_claims
 from ...verify import verify_artifact
-from ..widgets import HumanResultView, ImageAnatomyWidget, ResultBoundaryPanel, StatusBadge
+from ..widgets import HumanResultView, ImageAnatomyWidget, ResultBoundaryPanel
 from .common import file_field, save_text_dialog, show_guided_error
 
 
@@ -1095,8 +1092,8 @@ class CertificatePage(QWidget):
         der = QPushButton("DER Export"); der.clicked.connect(lambda: self.export_cert("der"))
         pem = QPushButton("PEM Export"); pem.clicked.connect(lambda: self.export_cert("pem"))
         spki = QPushButton("Public Key Export"); spki.clicked.connect(self.export_spki_key)
-        match = QPushButton("Certificate ↔ Private Key Eşleşmesini Kontrol Et"); match.clicked.connect(self.check_key_match)
-        actions.addWidget(clone, 0, 0); actions.addWidget(save, 0, 1); actions.addWidget(der, 1, 0); actions.addWidget(pem, 1, 1); actions.addWidget(spki, 2, 0); actions.addWidget(match, 2, 1)
+        match_button = QPushButton("Certificate ↔ Private Key Eşleşmesini Kontrol Et"); match_button.clicked.connect(self.check_key_match)
+        actions.addWidget(clone, 0, 0); actions.addWidget(save, 0, 1); actions.addWidget(der, 1, 0); actions.addWidget(pem, 1, 1); actions.addWidget(spki, 2, 0); actions.addWidget(match_button, 2, 1)
         layout.addLayout(actions)
         self.reissue_result = HumanResultView(show_boundary=False); layout.addWidget(self.reissue_result, 1)
         return page

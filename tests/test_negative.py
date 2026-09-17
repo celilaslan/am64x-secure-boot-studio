@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
 import hashlib
+from datetime import datetime, timedelta, timezone
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
@@ -10,7 +10,6 @@ from cryptography.x509.oid import NameOID, ObjectIdentifier
 
 from am64x_secure_toolkit.constants import TI_OIDS
 from am64x_secure_toolkit.negative import create_negative_variant, run_negative_suite
-from am64x_secure_toolkit.verify import verify_artifact
 from am64x_secure_toolkit.x509ext import (
     ExtBootComponent,
     ExtBootInfo,

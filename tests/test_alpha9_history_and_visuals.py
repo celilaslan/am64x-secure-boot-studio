@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from am64x_secure_toolkit.sdk_diff import compare_sdk_security
 from am64x_secure_toolkit.services.presentation import status_text
 from am64x_secure_toolkit.services.project import (
     compact_project_event,
@@ -12,8 +11,8 @@ from am64x_secure_toolkit.services.project import (
     record_project_event,
 )
 from am64x_secure_toolkit.services.sdk_compare import sdk_diff_view_model
-from am64x_secure_toolkit.services.workflow_visuals import generic_data_visual_model, secure_debug_visual_model
 from am64x_secure_toolkit.services.ui_contract import SECURE_DEBUG_TRANSPORT_OPTIONS
+from am64x_secure_toolkit.services.workflow_visuals import generic_data_visual_model, secure_debug_visual_model
 
 
 def test_sdk_diff_view_is_semantic_and_hides_configured_key_paths(tmp_path: Path):

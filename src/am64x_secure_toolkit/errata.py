@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-
 ERRATA_SOURCE = {
     "document": "AM64x/AM243x Processor Silicon Revision 1.0, 2.0 Errata",
     "document_id": "SPRZ457J",

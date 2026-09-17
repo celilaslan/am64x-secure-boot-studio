@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 KEY_CONTEXTS = {
     1: {
         "signing": "SMPK",

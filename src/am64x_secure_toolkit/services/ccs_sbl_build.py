@@ -16,7 +16,6 @@ from .ccs_secure_build import (
     lifecycle_build_configuration,
 )
 
-
 _SKIP_DIRS = {".git", ".venv", "venv", "__pycache__", "node_modules"}
 
 

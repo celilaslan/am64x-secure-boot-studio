@@ -9,7 +9,6 @@ from typing import Any
 
 from .ccs_build import scan_ccs_application_build
 
-
 _MAKEFILE_NAMES = ("makefile", "Makefile", "GNUmakefile")
 _CCS_BOOTIMAGE_MAKEFILE = "makefile_ccs_bootimage_gen"
 _SKIP_DIRS = {".git", ".venv", "venv", "__pycache__", "node_modules"}
@@ -320,7 +319,7 @@ def run_mcu_plus_secure_build(
                     post_public_variables = [
                         f"OUTNAME={outname}",
                         f"PROFILE={profile}",
-                        f"DEVICE=am64x",
+                        "DEVICE=am64x",
                         *public_variables,
                     ]
                     if sdk is not None:

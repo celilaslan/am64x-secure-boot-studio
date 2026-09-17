@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import hashlib
-import shutil
-from datetime import datetime, timezone
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -15,7 +14,6 @@ from ..der import first_der_object_length
 from ..inspect import inspect_artifact
 from ..keycheck import compare_key_material
 from ..profiles import save_profile
-
 
 SUBJECT_FIELDS: tuple[tuple[str, str, object], ...] = (
     ("country", "Country (C)", NameOID.COUNTRY_NAME),

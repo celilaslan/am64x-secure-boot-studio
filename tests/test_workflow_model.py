@@ -1,6 +1,6 @@
-from am64x_secure_toolkit.workflow import WorkflowResult
 from am64x_secure_toolkit.services.claim_boundary import claims_for
-from am64x_secure_toolkit.services.secret_policy import sanitize_for_record, contains_unredacted_secret_field
+from am64x_secure_toolkit.services.secret_policy import contains_unredacted_secret_field, sanitize_for_record
+from am64x_secure_toolkit.workflow import WorkflowResult
 
 
 def test_workflow_result_serializes():

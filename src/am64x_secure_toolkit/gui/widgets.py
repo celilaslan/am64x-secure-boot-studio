@@ -10,9 +10,9 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
     QLabel,
+    QMessageBox,
     QPlainTextEdit,
     QPushButton,
-    QMessageBox,
     QTableWidget,
     QTableWidgetItem,
     QTabWidget,
@@ -21,7 +21,6 @@ from PySide6.QtWidgets import (
 )
 
 from ..services.presentation import image_anatomy_model, result_presentation
-
 
 _STATUS_OBJECT = {
     "PASS": "statusPass",
@@ -309,7 +308,7 @@ class ImageAnatomyWidget(QWidget):
             return "Henüz image anatomy yok."
         return "; ".join(f"{b['label']} {b['size']} byte" for b in blocks)
 
-    def paintEvent(self, event) -> None:  # noqa: N802 - Qt API
+    def paintEvent(self, event) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         rect = self.rect().adjusted(12, 16, -12, -18)

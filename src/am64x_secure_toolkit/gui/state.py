@@ -5,14 +5,23 @@ from typing import Any
 from PySide6.QtCore import QObject, Signal
 
 from ..services.environment import EnvironmentResolution, resolve_environment
+from ..services.preferences import (
+    UserPreferences,
+    load_preferences,
+    save_preferences,
+    with_context,
+    with_mode,
+    with_recent_project,
+    with_sdk_root,
+)
 from ..services.project import (
-    ProjectContext, read_project_artifacts, read_project_events,
-    record_project_artifacts, record_project_event,
+    ProjectContext,
+    read_project_artifacts,
+    read_project_events,
+    record_project_artifacts,
+    record_project_event,
 )
 from ..services.secret_policy import sanitize_for_record
-from ..services.preferences import (
-    UserPreferences, load_preferences, save_preferences, with_context, with_mode, with_recent_project, with_sdk_root,
-)
 
 
 class AppState(QObject):

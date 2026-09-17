@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from ..keycheck import preflight_signing_key
-from .certificate_center import certificate_metadata, compare_certificate_with_private_key
+from ..workflows.inspect import inspect_and_verify
 from .ccs_sbl_build import run_mcu_plus_sbl_build
 from .ccs_secure_build import run_mcu_plus_secure_build
+from .certificate_center import certificate_metadata, compare_certificate_with_private_key
 from .secure_boot_profile import assess_secure_boot_profile
-from ..workflows.inspect import inspect_and_verify
 
 
 def _prepare_signing_identity(

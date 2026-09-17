@@ -7,7 +7,7 @@ from typing import Any
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID, ObjectIdentifier
 
 from ..certificate import SysfwIntegrity, SysfwSwrev
