@@ -4,6 +4,7 @@ import importlib.util
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -25,6 +26,16 @@ def main(argv: list[str] | None = None) -> int:
         return 3
 
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
+    # Navigating to an expert-only page calls set_mode("expert"), which the Studio
+    # persists. Point the config home at a throwaway directory so this harness runs
+    # from default preferences and never reads or rewrites the user's real settings.
+    with tempfile.TemporaryDirectory(prefix="securestudio-qt-visual-qa-") as config_home:
+        os.environ["AM64X_STUDIO_CONFIG_HOME"] = config_home
+        return _render(out_dir, report_path)
+
+
+def _render(out_dir: Path, report_path: Path) -> int:
     from PySide6.QtWidgets import QApplication
 
     from am64x_secure_toolkit.gui.main_window import MainWindow
