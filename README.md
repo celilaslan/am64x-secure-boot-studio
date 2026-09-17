@@ -314,10 +314,14 @@ project does not bend the vendor flow to accommodate them.
 
 Current development release: **`2.0.0-alpha33`**.
 
-Host-side functionality is implemented and covered by the test suite. Real
-Windows and on-board validation is still in progress, so no final release is
-declared. Release readiness is reported as `PARTIAL` by the project's own
-`beta-readiness` check until clean-machine and hardware validation are executed.
+Host-side functionality is implemented and covered by the test suite, which CI
+runs on Python 3.10-3.13 across Ubuntu and Windows.
+
+That establishes that the logic runs on both platforms. It is deliberately not the
+same claim as validating the desktop application on a clean Windows machine, or the
+boot flow on real silicon — both of which are still in progress. No final release is
+declared, and the project's own `beta-readiness` check reports `PARTIAL` until
+clean-machine and hardware validation are executed.
 
 ## License
 
