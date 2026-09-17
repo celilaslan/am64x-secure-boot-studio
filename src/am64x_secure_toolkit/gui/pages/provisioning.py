@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
-from PySide6.QtWidgets import QFormLayout, QHBoxLayout, QLabel, QPushButton, QPlainTextEdit, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFormLayout, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
 from ...provision import provision_preflight, save_provision_profile, template_provision_profile
 from ...services.claim_boundary import attach_claims
@@ -25,7 +24,7 @@ class ProvisioningPage(QWidget):
         try:
             p=save_text_dialog(self,"Provisioning profile kaydet",lambda p: save_provision_profile(template_provision_profile(),p),".yaml")
             if p:self.profile.setText(str(p))
-        except Exception as exc: Qshow_guided_error(self, exc, context="Profile oluşturulamadı")
+        except Exception as exc: show_guided_error(self, exc, context="Profile oluşturulamadı")
     def run(self):
         try:
             result=provision_preflight(self.profile.text(),smek=Path(self.smek.text()) if self.smek.text().strip() else None,bmek=Path(self.bmek.text()) if self.bmek.text().strip() else None)
@@ -33,4 +32,4 @@ class ProvisioningPage(QWidget):
             self.state.set_last_result(result)
             self.diagram.set_model(provisioning_visual_model(result))
             self.result_view.set_result(result)
-        except Exception as exc: Qshow_guided_error(self, exc, context="Provisioning preflight başarısız")
+        except Exception as exc: show_guided_error(self, exc, context="Provisioning preflight başarısız")
