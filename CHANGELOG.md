@@ -1,5 +1,48 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Fixed a latent `NameError` on GUI error paths: nine exception handlers in the
+  Provisioning, Security BoardCfg, KEYREV/SWREV and Errata pages called
+  `Qshow_guided_error` instead of `show_guided_error`. Any failure in those
+  workflows raised `NameError` from inside the handler instead of showing the
+  guided error dialog. The source-level UX audit did not catch this because the
+  typo contains the expected symbol name as a substring.
+- Restored the module docstrings of `services/sdk_compare.py` and
+  `services/workflow_visuals.py`. Both were placed after `from __future__ import
+  annotations`, which made them plain string expressions, leaving `__doc__` as
+  `None`.
+- `negative.py` no longer binds the result of the DER boundary check it performs
+  purely for validation; the validating call itself is preserved.
+
+### Added
+
+- MIT `LICENSE`.
+- `.gitignore`, including patterns that keep key material and signed build output
+  out of the repository.
+- GitHub Actions CI: the test suite on Python 3.10-3.13 across Ubuntu and Windows,
+  a `ruff check` lint gate, and a headless render of all 23 Studio pages.
+- `tools/capture_screenshots.py`, which renders the full application window
+  offscreen for documentation and render-regression checks.
+- English `README.md` and Turkish `README.tr.md`, with screenshots and an
+  architecture diagram.
+- Ruff configuration in `pyproject.toml`, documenting which rule families are
+  deliberately not enforced and why.
+
+### Changed
+
+- Rewrote the README. The nine per-alpha sections it had accumulated are dropped;
+  that history is already recorded here and in `docs/archive/`.
+- Moved 43 historical per-iteration records (`IMPLEMENTATION_QA_ALPHA*.md`,
+  `STUDIO_V2_ALPHA*.md`, `BASELINE_V1_LOCK.md`) and the point-in-time
+  `PACKAGE_MANIFEST.sha256` into `docs/archive/`, with an index explaining what
+  they are. `docs/` now holds 21 current documents instead of 64 mixed files.
+- Applied ruff's import sorting and removed unused imports across the codebase.
+  `ruff check src tests tools` is clean.
+- Regression: 288 tests pass; all 23 Studio pages render offscreen.
+
 ## 2.0.0-alpha33
 
 - Added `studio.sh` for restricted Linux hosts: no sudo, Git or manual virtual-environment activation is required.
