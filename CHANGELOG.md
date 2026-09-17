@@ -16,6 +16,11 @@
   `None`.
 - `negative.py` no longer binds the result of the DER boundary check it performs
   purely for validation; the validating call itself is preserved.
+- The Qt QA and screenshot tools no longer mutate the user's saved settings.
+  Navigating to an expert-only page calls `set_mode("expert")`, which the Studio
+  persists, so running `tools/qt_visual_qa.py` silently switched the user's saved
+  mode. Both tools now point `AM64X_STUDIO_CONFIG_HOME` at a throwaway directory,
+  which also makes their output reproducible instead of depending on local state.
 
 ### Added
 
@@ -30,6 +35,12 @@
   architecture diagram.
 - Ruff configuration in `pyproject.toml`, documenting which rule families are
   deliberately not enforced and why.
+- `SECURITY.md` with a private vulnerability reporting route and an explicit
+  in-scope / out-of-scope list for a host-side toolkit.
+- `CITATION.cff`, so the project can be cited directly from GitHub.
+- A `--mode` option for `tools/capture_screenshots.py`, so Guided Mode and Expert
+  Mode views can be captured deliberately rather than inheriting whatever mode was
+  last saved.
 
 ### Changed
 
@@ -41,7 +52,12 @@
   they are. `docs/` now holds 21 current documents instead of 64 mixed files.
 - Applied ruff's import sorting and removed unused imports across the codebase.
   `ruff check src tests tools` is clean.
-- Regression: 288 tests pass; all 23 Studio pages render offscreen.
+- Rewrote `docs/GUI.md`. It was organised as a chronology of alpha iterations;
+  it now describes the interface as it is - modes, screens, the shared
+  visual/semantic system, project-aware output and the safety boundary - with
+  screenshots generated from the application.
+- Regression: 288 tests pass; all 23 Studio pages render offscreen; the project's
+  own `release-scan` reports 0 findings across 278 files.
 
 ## 2.0.0-alpha33
 
