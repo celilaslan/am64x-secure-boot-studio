@@ -5,8 +5,14 @@ applied theme) so the images match what a user sees on a real desktop. It is a
 documentation/QA helper: offscreen rendering proves the pages construct and paint
 without errors, but it does not replace human visual QA on a supported desktop host.
 
+Screenshots are reproducible. The tool points `AM64X_STUDIO_CONFIG_HOME` at a
+throwaway directory, so every run starts from default preferences and none of the
+user's real settings are read or modified. This matters because navigating to an
+expert-only page calls `set_mode("expert")`, which the Studio persists.
+
 Usage:
-    python tools/capture_screenshots.py [OUTPUT_DIR] [--pages home,secure_boot,...]
+    python tools/capture_screenshots.py [OUTPUT_DIR] [--mode guided|expert]
+                                        [--pages home,secure_boot,...] [--all]
 """
 
 from __future__ import annotations
@@ -15,9 +21,11 @@ import importlib.util
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 
-# Pages used in the README/documentation gallery, in presentation order.
+# Pages used in the README gallery, in presentation order. These are all available
+# in Guided Mode, so the navigation sidebar stays consistent across the images.
 DEFAULT_PAGES = (
     "home",
     "secure_boot",
@@ -30,17 +38,29 @@ DEFAULT_PAGES = (
 WINDOW_SIZE = (1440, 900)
 
 
+def _take_option(argv: list[str], name: str) -> str | None:
+    if name not in argv:
+        return None
+    i = argv.index(name)
+    if i + 1 >= len(argv):
+        raise SystemExit(f"error: {name} requires a value")
+    value = argv[i + 1]
+    del argv[i : i + 2]
+    return value
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = list(argv if argv is not None else sys.argv[1:])
 
+    mode = _take_option(argv, "--mode") or "guided"
+    if mode not in {"guided", "expert"}:
+        print(f"error: --mode must be 'guided' or 'expert', got {mode!r}", file=sys.stderr)
+        return 2
+
+    pages_option = _take_option(argv, "--pages")
     requested: tuple[str, ...] = DEFAULT_PAGES
-    if "--pages" in argv:
-        i = argv.index("--pages")
-        if i + 1 >= len(argv):
-            print("error: --pages requires a comma-separated page list", file=sys.stderr)
-            return 2
-        requested = tuple(p.strip() for p in argv[i + 1].split(",") if p.strip())
-        del argv[i : i + 2]
+    if pages_option:
+        requested = tuple(p.strip() for p in pages_option.split(",") if p.strip())
     if "--all" in argv:
         argv.remove("--all")
         requested = ()
@@ -62,6 +82,14 @@ def main(argv: list[str] | None = None) -> int:
         return 3
 
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
+    with tempfile.TemporaryDirectory(prefix="securestudio-screenshots-") as config_home:
+        # Set before MainWindow is built: GUI state loads preferences on construction.
+        os.environ["AM64X_STUDIO_CONFIG_HOME"] = config_home
+        return _capture(out_dir, requested, mode)
+
+
+def _capture(out_dir: Path, requested: tuple[str, ...], mode: str) -> int:
     from PySide6.QtWidgets import QApplication
 
     from am64x_secure_toolkit.gui.main_window import MainWindow
@@ -72,6 +100,7 @@ def main(argv: list[str] | None = None) -> int:
     apply_application_theme(app)
 
     window = MainWindow()
+    window.state.set_mode(mode)
     window.resize(*WINDOW_SIZE)
     window.show()
     app.processEvents()
@@ -107,6 +136,8 @@ def main(argv: list[str] | None = None) -> int:
             {
                 "status": "PASS" if not failures else "FAIL",
                 "output_dir": str(out_dir),
+                "requested_mode": mode,
+                "effective_mode": window.state.mode,
                 "window_size": list(WINDOW_SIZE),
                 "screenshots": saved,
                 "failed_pages": failures,
