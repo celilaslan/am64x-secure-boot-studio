@@ -317,10 +317,14 @@ proje vendor akışını bunlara uydurmaya çalışmaz.
 
 Güncel geliştirme sürümü: **`2.0.0-alpha33`**.
 
-Host tarafındaki işlevsellik tamamlanmış ve test seti ile kapsanmıştır. Gerçek
-Windows ve kart üzerinde doğrulama sürdüğü için final sürüm ilan edilmemiştir.
-Temiz makine ve donanım doğrulaması çalıştırılana kadar release readiness,
-projenin kendi `beta-readiness` kontrolü tarafından `PARTIAL` olarak raporlanır.
+Host tarafındaki işlevsellik tamamlanmış ve test seti ile kapsanmıştır; CI bu seti
+Ubuntu ve Windows üzerinde Python 3.10-3.13 ile çalıştırır.
+
+Bu, mantığın her iki platformda da çalıştığını gösterir. Bilinçli olarak, masaüstü
+uygulamasının temiz bir Windows makinesinde veya boot akışının gerçek silikon
+üzerinde doğrulanmasıyla **aynı iddia değildir**; ikisi de sürmektedir. Final sürüm
+ilan edilmemiştir ve temiz makine ile donanım doğrulaması çalıştırılana kadar
+projenin kendi `beta-readiness` kontrolü `PARTIAL` raporlar.
 
 ## Lisans
 
