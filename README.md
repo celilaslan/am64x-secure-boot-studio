@@ -81,7 +81,8 @@ expected UART output on a provisioned part. The toolkit states this in the GUI,
 in reports and in every result that could otherwise be mistaken for hardware
 evidence.
 
-Full details: [`docs/SECURITY_BOUNDARY.md`](docs/SECURITY_BOUNDARY.md).
+Full details: [`docs/SECURITY_BOUNDARY.md`](docs/SECURITY_BOUNDARY.md). To report a
+security issue, see [`SECURITY.md`](SECURITY.md).
 
 ## Screenshots
 
@@ -204,33 +205,28 @@ The desktop application separates a **Guided Mode** for everyday tasks from an
 ## Architecture
 
 ```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 420, "curve": "basis"}}}%%
 flowchart TD
     subgraph UI["User interfaces"]
-        GUI["securestudio<br/>PySide6 · 23 pages"]
-        CLI["securectl<br/>20 subcommands"]
+        GUI["<b>securestudio</b> — PySide6 desktop, 23 pages"]
+        CLI["<b>securectl</b> — 20 subcommands"]
     end
 
-    subgraph SVC["Services — presentation, policy, orchestration"]
-        S1["secure_boot_package<br/>ccs_secure_build"]
-        S2["certificate_center<br/>key_roles"]
-        S3["claim_boundary<br/>secret_policy"]
-        S4["environment<br/>project · session"]
+    subgraph SVC["Services — policy and orchestration"]
+        S1["secure_boot_package · ccs_secure_build<br/>certificate_center · key_roles"]
+        S2["claim_boundary · secret_policy<br/>environment · project · session"]
     end
 
     subgraph CORE["Core — pure host-side logic"]
-        C1["certificate · der · x509ext"]
-        C2["verify · inspect · negative"]
-        C3["keygen · keycheck · provision"]
-        C4["boardcfg · revision · errata"]
-        C5["build · sdk_lint · sdk_diff"]
+        C1["certificate · der · x509ext<br/>verify · inspect · negative"]
+        C2["keygen · keycheck · provision<br/>boardcfg · revision · errata"]
+        C3["build · sdk_lint · sdk_diff"]
     end
 
-    TI["Installed TI MCU+ SDK tools<br/>appimage_x509_cert_gen.py · rom_image_gen.py"]
-    HW(["AM64x target<br/>never written by this toolkit"])
+    TI["<b>Installed TI MCU+ SDK tools</b><br/>appimage_x509_cert_gen.py · rom_image_gen.py"]
+    HW(["<b>AM64x target</b> — never written by this toolkit"])
 
-    GUI --> SVC
-    CLI --> SVC
-    CLI --> CORE
+    UI --> SVC
     SVC --> CORE
     CORE -->|"controlled invocation"| TI
     TI -.->|"signed output, re-verified on return"| CORE
@@ -283,6 +279,7 @@ does not claim otherwise.
 | [`docs/KULLANIM.md`](docs/KULLANIM.md) | Full command reference (Turkish) |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Modules and data flow |
 | [`docs/SECURITY_BOUNDARY.md`](docs/SECURITY_BOUNDARY.md) | What the toolkit does and does not claim |
+| [`SECURITY.md`](SECURITY.md) | Reporting a vulnerability, and what is in scope |
 | [`docs/CERTIFICATES.md`](docs/CERTIFICATES.md) · [`docs/CERTIFICATE_CENTER.md`](docs/CERTIFICATE_CENTER.md) | X.509 operations and the Certificate Center |
 | [`docs/KEYS.md`](docs/KEYS.md) | Signing key and MEK handling |
 | [`docs/PROVISIONING.md`](docs/PROVISIONING.md) · [`docs/REVISION.md`](docs/REVISION.md) · [`docs/BOARDCFG.md`](docs/BOARDCFG.md) | Provisioning readiness, KEYREV/SWREV, board configuration |

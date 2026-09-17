@@ -83,7 +83,8 @@ boot kanıtı değildir. Tek kanıt, provision edilmiş bir parçada imzalı ima
 beklenen UART çıktısıyla boot etmesidir. Araç seti bunu GUI'de, raporlarda ve
 donanım kanıtı sanılabilecek her sonuçta açıkça belirtir.
 
-Ayrıntılar: [`docs/SECURITY_BOUNDARY.md`](docs/SECURITY_BOUNDARY.md).
+Ayrıntılar: [`docs/SECURITY_BOUNDARY.md`](docs/SECURITY_BOUNDARY.md). Güvenlik açığı
+bildirimi için: [`SECURITY.md`](SECURITY.md).
 
 ## Ekran görüntüleri
 
@@ -207,33 +208,28 @@ security ekranlarını açan **Uzman Modu**'nu birbirinden ayırır.
 ## Mimari
 
 ```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 420, "curve": "basis"}}}%%
 flowchart TD
     subgraph UI["Kullanıcı arayüzleri"]
-        GUI["securestudio<br/>PySide6 · 23 sayfa"]
-        CLI["securectl<br/>20 alt komut"]
+        GUI["<b>securestudio</b> — PySide6 masaüstü, 23 sayfa"]
+        CLI["<b>securectl</b> — 20 alt komut"]
     end
 
-    subgraph SVC["Servisler — sunum, policy, orkestrasyon"]
-        S1["secure_boot_package<br/>ccs_secure_build"]
-        S2["certificate_center<br/>key_roles"]
-        S3["claim_boundary<br/>secret_policy"]
-        S4["environment<br/>project · session"]
+    subgraph SVC["Servisler — policy ve orkestrasyon"]
+        S1["secure_boot_package · ccs_secure_build<br/>certificate_center · key_roles"]
+        S2["claim_boundary · secret_policy<br/>environment · project · session"]
     end
 
     subgraph CORE["Çekirdek — saf host-side mantık"]
-        C1["certificate · der · x509ext"]
-        C2["verify · inspect · negative"]
-        C3["keygen · keycheck · provision"]
-        C4["boardcfg · revision · errata"]
-        C5["build · sdk_lint · sdk_diff"]
+        C1["certificate · der · x509ext<br/>verify · inspect · negative"]
+        C2["keygen · keycheck · provision<br/>boardcfg · revision · errata"]
+        C3["build · sdk_lint · sdk_diff"]
     end
 
-    TI["Kurulu TI MCU+ SDK araçları<br/>appimage_x509_cert_gen.py · rom_image_gen.py"]
-    HW(["AM64x target<br/>bu araç seti tarafından asla yazılmaz"])
+    TI["<b>Kurulu TI MCU+ SDK araçları</b><br/>appimage_x509_cert_gen.py · rom_image_gen.py"]
+    HW(["<b>AM64x target</b> — bu araç seti tarafından asla yazılmaz"])
 
-    GUI --> SVC
-    CLI --> SVC
-    CLI --> CORE
+    UI --> SVC
     SVC --> CORE
     CORE -->|"kontrollü çağrı"| TI
     TI -.->|"imzalı çıktı, dönüşte yeniden doğrulanır"| CORE
@@ -287,6 +283,7 @@ geçmez ve proje bunun aksini iddia etmez.
 | [`docs/KULLANIM.md`](docs/KULLANIM.md) | Tüm komutların ayrıntılı kullanımı |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Modüller ve veri akışları |
 | [`docs/SECURITY_BOUNDARY.md`](docs/SECURITY_BOUNDARY.md) | Araç setinin iddia ettiği ve etmediği şeyler |
+| [`SECURITY.md`](SECURITY.md) | Güvenlik açığı bildirimi ve kapsam |
 | [`docs/CERTIFICATES.md`](docs/CERTIFICATES.md) · [`docs/CERTIFICATE_CENTER.md`](docs/CERTIFICATE_CENTER.md) | X.509 işlemleri ve Certificate Center |
 | [`docs/KEYS.md`](docs/KEYS.md) | Signing key ve MEK kontrolleri |
 | [`docs/PROVISIONING.md`](docs/PROVISIONING.md) · [`docs/REVISION.md`](docs/REVISION.md) · [`docs/BOARDCFG.md`](docs/BOARDCFG.md) | Provisioning hazırlığı, KEYREV/SWREV, board configuration |
