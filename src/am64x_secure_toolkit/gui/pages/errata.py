@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from PySide6.QtWidgets import QComboBox, QFormLayout, QLabel, QPushButton, QPlainTextEdit, QTabWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QComboBox, QFormLayout, QLabel, QPlainTextEdit, QPushButton, QTabWidget, QVBoxLayout, QWidget
 
 from ...errata import check_errata, list_errata
 from ...services.claim_boundary import attach_claims
@@ -15,14 +15,13 @@ from ...services.ui_contract import (
     ERRATA_OUTER_RSA_OPTIONS,
     ERRATA_REDUNDANT_OPTIONS,
 )
+from .common import show_guided_error
 
 
 def _combo(options):
     c=QComboBox()
     for label,value in options:c.addItem(label,value)
     return c
-
-from .common import show_guided_error
 
 
 class ErrataPage(QWidget):
@@ -48,9 +47,9 @@ class ErrataPage(QWidget):
     def run_list(self):
         try:
             result=list_errata(revision=self.list_rev.currentText(),category=str(self.category.currentData()),boot_mode=str(self.boot_mode.currentData())); result=attach_claims(result,"errata",result.get("status","PASS")); self.state.set_last_result(result); self.list_out.setPlainText(json.dumps(result,indent=2,ensure_ascii=False))
-        except Exception as exc: Qshow_guided_error(self, exc, context="Errata list başarısız")
+        except Exception as exc: show_guided_error(self, exc, context="Errata list başarısız")
 
     def run_check(self):
         try:
             result=check_errata(revision=self.check_rev.currentText(),device_state=str(self.device_state.currentData()),flow=str(self.flow.currentData()),primary_boot=str(self.primary.currentData()),backup_boot=str(self.backup.currentData()),outer_rsa=str(self.outer_rsa.currentData()),certificate_info=str(self.cert_info.currentData()),redundant_content=str(self.redundant.currentData()),external_emulator=str(self.emulator.currentData())); result=attach_claims(result,"errata",result.get("status","PARTIAL")); self.state.set_last_result(result); self.check_out.setPlainText(json.dumps(result,indent=2,ensure_ascii=False))
-        except Exception as exc: Qshow_guided_error(self, exc, context="Errata check başarısız")
+        except Exception as exc: show_guided_error(self, exc, context="Errata check başarısız")

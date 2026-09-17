@@ -1,8 +1,16 @@
 from __future__ import annotations
 
-import json
-
-from PySide6.QtWidgets import QComboBox, QFormLayout, QLabel, QLineEdit, QPushButton, QPlainTextEdit, QSpinBox, QTabWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QComboBox,
+    QFormLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSpinBox,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 from ...revision import key_revision_matrix, simulate_key_revision, simulate_swrev, swrev_field_info
 from ...services.claim_boundary import attach_claims
@@ -30,7 +38,7 @@ class RevisionPage(QWidget):
             self.state.set_last_result(result)
             self.key_diagram.set_model(key_revision_visual_model(result))
             self.key_result.set_result(result)
-        except Exception as exc: Qshow_guided_error(self, exc, context="KEYREV simulation başarısız")
+        except Exception as exc: show_guided_error(self, exc, context="KEYREV simulation başarısız")
     def show_matrix(self):
         result=key_revision_matrix(); result=attach_claims(result,"revision",result.get("status","PASS")); self.state.set_last_result(result); self.key_result.set_result(result)
     def run_sw(self):
@@ -40,6 +48,6 @@ class RevisionPage(QWidget):
             self.state.set_last_result(result)
             self.sw_diagram.set_model(swrev_visual_model(result))
             self.sw_result.set_result(result)
-        except Exception as exc: Qshow_guided_error(self, exc, context="SWREV simulation başarısız")
+        except Exception as exc: show_guided_error(self, exc, context="SWREV simulation başarısız")
     def show_info(self):
         result=swrev_field_info(); result=attach_claims(result,"revision",result.get("status","PASS")); self.state.set_last_result(result); self.sw_result.set_result(result)

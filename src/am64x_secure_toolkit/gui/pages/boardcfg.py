@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
-from PySide6.QtWidgets import QFormLayout, QLabel, QLineEdit, QPushButton, QPlainTextEdit, QSpinBox, QTabWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFormLayout, QLabel, QPushButton, QSpinBox, QTabWidget, QVBoxLayout, QWidget
 
 from ...boardcfg import check_boardcfg_profile, evaluate_revision_writer, save_boardcfg_profile, template_boardcfg_profile
 from ...services.claim_boundary import attach_claims
@@ -27,7 +24,7 @@ class BoardCfgPage(QWidget):
         try:
             path=save_text_dialog(self,"Security BoardCfg profile kaydet",lambda p: save_boardcfg_profile(template_boardcfg_profile(),p),".yaml")
             if path:self.profile.setText(str(path))
-        except Exception as exc: Qshow_guided_error(self, exc, context="Profile oluşturulamadı")
+        except Exception as exc: show_guided_error(self, exc, context="Profile oluşturulamadı")
     def run_check(self):
         try:
             result=check_boardcfg_profile(self.profile.text())
@@ -35,7 +32,7 @@ class BoardCfgPage(QWidget):
             self.state.set_last_result(result)
             self.policy_diagram.set_model(boardcfg_policy_visual_model(result))
             self.policy_result.set_result(result)
-        except Exception as exc: Qshow_guided_error(self, exc, context="BoardCfg check başarısız")
+        except Exception as exc: show_guided_error(self, exc, context="BoardCfg check başarısız")
     def run_writer(self):
         try:
             result=evaluate_revision_writer(self.writer_profile.text(),self.host.value())
@@ -43,4 +40,4 @@ class BoardCfgPage(QWidget):
             self.state.set_last_result(result)
             self.writer_diagram.set_model(writer_authorization_visual_model(result))
             self.writer_result.set_result(result)
-        except Exception as exc: Qshow_guided_error(self, exc, context="Writer policy başarısız")
+        except Exception as exc: show_guided_error(self, exc, context="Writer policy başarısız")
