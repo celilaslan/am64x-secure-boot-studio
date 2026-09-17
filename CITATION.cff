@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+title: AM64x Secure Boot Studio
+message: If you use this software or refer to it in your work, please cite it.
+type: software
+authors:
+  - given-names: Celil
+    family-names: Aslan
+repository-code: https://github.com/celilaslan/am64x-secure-boot-studio
+abstract: >-
+  A guided desktop application and command-line toolkit for preparing, inspecting
+  and verifying secure boot artifacts on Texas Instruments AM64x / AM6442 devices.
+  It wraps the official MCU+ SDK signing tools with host-side validation of
+  certificate and signing-key identity, device lifecycle matching, and explicit
+  separation between host-side results and on-target enforcement.
+keywords:
+  - secure boot
+  - embedded security
+  - X.509
+  - code signing
+  - Texas Instruments
+  - AM64x
+  - AM243x
+  - MCU+ SDK
+  - TISCI
+license: MIT
+version: 2.0.0-alpha33
